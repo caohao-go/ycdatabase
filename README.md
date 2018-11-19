@@ -97,3 +97,9 @@ echo json_encode($ret);
 ```
  ![Image](https://github.com/caohao0730/ycdatabase/blob/master/image-folder/query_select.jpg)
  
+
+## where statement
+```
+$ycdb->select("user_info_test", "username", ["sexuality" => "male"]);
+// WHERE sexuality = male
+```
