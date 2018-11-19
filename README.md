@@ -48,7 +48,7 @@ $ycdb = new ycdb($options);
   we can start by creating a ycdatabase object (ycdb) from the obove code, db_conf include host,username,password,dbname,port and option, option is a pdo attribution, you can get the detail from http://php.net/manual/en/pdo.setattribute.php, For example, PDO::ATTR_TIMEOUT in the above code is specifies the timeout duration in seconds, and PDO::ATTR_CASE is forcing column names to a specific case.<br><br>
   _我们通过上面代码创建ycdatabase对象(ycdb)，db_conf是数据库配置，包含host,username,password,dbname,port等信息，还包含option参数，这个参数是pdo的设置参数，具体您可以参考网站 http://php.net/manual/zh/pdo.setattribute.php  , 例如上面代码中的PDO::ATTR_TIMEOUT是连接超时时间(秒)，PDO::ATTR_CASE是强制列名为指定的大小写。_
 
-## init pdo connection
+## Init pdo connection
 - we need to init pdo connection before we use ycdatabase.
 ```
 try{
@@ -63,18 +63,26 @@ try{
 ## Native SQL query
 我们可以通过exec函数直接执行sql语句，返回值为执行结果影响行数，如果 $ret = -1 则说明 sql 执行出错，我们可以通过 $ycdb->errorCode,$ycdb->errorInfo() 分别返回错误代码、错误描述。
 
-
+- insert data
 ```
-$ret = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) values('smallhow', 'male', 29, 180)");
+$ret = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) 
+                    values('smallhow', 'male', 29, 180)");
 if($ret == -1) {
-	$code = $ycdb->errorCode();
-	$info = $ycdb->errorInfo();
-	echo "code:" . $code . "\n";
-	echo "info:" . $info[2] . "\n";
+    $code = $ycdb->errorCode();
+    $info = $ycdb->errorInfo();
+    echo "code:" . $code . "\n";
+    echo "info:" . $info[2] . "\n";
 } else {
-	echo $ret;
+    echo $ret;
 }
 ```
+
+- update data
+
+ ![Image](https://github.com/caohao0730/ycdatabase/blob/master/image-folder/table.jpg)
+
+if we execute the following update statement, $ret returns 3 if the current data is the above image.
 ```
-$ret = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) values('smallhow', 'male', 29, 180)");
+$ret = $ycdb->exec("update user_info_test set remark='test' where height>=180");
+echo $ret;
 ```
