@@ -84,7 +84,7 @@ if($ret == -1) {
 if we execute the following update statement, $ret returns 3 if the current data is the above image.
 ```
 $ret = $ycdb->exec("update user_info_test set remark='test' where height>=180");
-echo $ret;
+echo $ret; //ret is 3
 ```
 
 - select data
