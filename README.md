@@ -10,7 +10,7 @@
 - need support **PDO** for mysql
 
 ## create a test table
-```
+```sql
 CREATE TABLE `user_info_test` (
   `uid` int(11) NOT NULL COMMENT 'userid' AUTO_INCREMENT,
   `username` varchar(64) NOT NULL COMMENT 'username',
@@ -32,8 +32,7 @@ $make && make install
 
 ## Start 
 - new ycdb()
-```
-<?php
+```php
 $db_conf = array("host" => "127.0.0.1", 
                  "username" => "root", 
                  "password" => "test123123", 
@@ -51,7 +50,7 @@ $ycdb = new ycdb($options);
 
 ## Init ycdb connection
 - we need to init pdo connection before we use ycdatabase.
-```
+```php
 try{
     $ycdb->initialize();
 } catch (PDOException $e) {
@@ -68,7 +67,7 @@ _我们可以通过exec函数直接执行sql语句，返回值为执行结果影
 
 
 - insert data
-```
+```php
 $ret = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) 
                     values('smallhow', 'male', 29, 180)");
 if($ret == -1) {
@@ -86,13 +85,13 @@ if($ret == -1) {
  ![Image](https://github.com/caohao0730/ycdatabase/blob/master/image-folder/table.jpg)
 
 if we execute the following update statement, $ret returns 3 if the current data is the above image.
-```
+```php
 $ret = $ycdb->exec("update user_info_test set remark='test' where height>=180");
 echo $ret; //ret is 3
 ```
 
 - select data
-```
+```php
 $ret = $ycdb->query("select * from user_info_test where bool_flag=1");
 echo json_encode($ret);
 ```
@@ -101,7 +100,7 @@ echo json_encode($ret);
 
 ## Where statement
 - Basic usage _基本用法_
-```
+```php
 $ycdb->select("user_info_test", "username", ["sexuality" => "male"]);
 // WHERE sexuality = 'male'
 
@@ -150,7 +149,7 @@ $data = $ycdb->select("user_info_test", "*", [
 - Conditional Query _条件搜索_ 
 
 You can use "AND" or "OR" to make up very complex SQL statements.
-```
+```php
 $data = $ycdb->select("user_info_test", "*", [
   "AND" => [
     "uid[>]" => 3,
@@ -215,7 +214,7 @@ $data = $ycdb->select("user_info_test", "*", [
 - Fuzzy Matching _模糊匹配 Like_
 
 LIKE USAGE [~].
-```
+```php
 $data = $ycdb->select("user_info_test", "*", [
   "username[~]" => "%ide%"
 ]);
@@ -233,7 +232,7 @@ $data = $ycdb->select("user_info_test", "*", [
 ```
 
 - Use of wildcards _通配符的使用_
-```
+```php
 $ycdb->select("user_info_test", "*", [
   "username[~]" => "Londo_"  // London, Londox, Londos...
 ]);
