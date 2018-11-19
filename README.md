@@ -99,7 +99,7 @@ echo json_encode($ret);
  
 
 ## Where statement
-- basic usage
+- Basic usage
 ```
 $ycdb->select("user_info_test", "username", ["sexuality" => "male"]);
 // WHERE sexuality = 'male'
@@ -145,3 +145,70 @@ $data = $ycdb->select("user_info_test", "*", [
 // bool_flag = 1 AND 
 // remark IS NOT NULL
 ```
+
+- Conditional search
+You can use "AND" or "OR" to stitch very complex SQL statements.
+```
+$data = $ycdb->select("user_info_test", "*", [
+  "AND" => [
+    "uid[>]" => 3,
+    "age[<>]" => [28, 29],
+    "sexuality" => "female"
+  ]
+]);
+// WHERE uid > 3 AND age BETWEEN 29 AND 29 AND sexuality = 'female'
+
+$data = $ycdb->select("user_info_test", "*", [
+  "OR" => [
+    "uid[>]" => 3,
+    "age[<>]" => [28, 29],
+    "sexuality" => "female"
+  ]
+]);
+// WHERE uid > 3 OR age BETWEEN 29 AND 29 OR sexuality = 'female'
+
+$data = $ycdb->select("user_info_test", "*", [
+  "AND" => [
+    "OR" => [
+            "age" => 29,
+            "sexuality" => "female"
+    ],
+    "height" => 177
+  ]
+]);
+// WHERE (age = 29 OR sexuality='female') AND height = 177
+
+//Attention
+//Because ycdb uses array arguments, the first OR is overwritten, the following usage is wrong, 
+//第一个 OR 被覆盖了，所以这个写法是错误的
+$data = $ycdb->select("user_info_test", "*", [
+  "AND" => [
+    "OR" => [
+            "age" => 29,
+            "sexuality" => "female"
+    ],
+    "OR" => [
+            "uid[!]" => 3,
+            "height[>=]" => 170
+    ],
+  ]
+]);
+// [X] SELECT * FROM user_info_test WHERE (uid != 3 OR height >= 170)
+
+//We can use # and comments to distinguish between two diffrents OR
+//我们可以用 # + 注释 来区分两个不同的 OR
+$data = $ycdb->select("user_info_test", "*", [
+  "AND" => [
+    "OR #1" => [
+            "age" => 29,
+            "sexuality" => "female"
+    ],
+    "OR #2" => [
+            "uid[!]" => 3,
+            "height[>=]" => 170
+    ],
+  ]
+]);
+// [√] SELECT * FROM user_info_test WHERE (age = 29 OR sexuality = 'female') AND (uid != 3 OR height >= 170)
+```
+
