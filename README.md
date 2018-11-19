@@ -178,9 +178,8 @@ $data = $ycdb->select("user_info_test", "*", [
 ]);
 // WHERE (age = 29 OR sexuality='female') AND height = 177
 
-//Attention
-//Because ycdb uses array arguments, the first OR is overwritten, the following usage is wrong, 
-//第一个 OR 被覆盖了，所以这个写法是错误的
+//Attention： Because ycdb uses array arguments, the first OR is overwritten, the following usage is wrong, 
+//注意： 第一个 OR 被覆盖了，所以这个写法是错误的
 $data = $ycdb->select("user_info_test", "*", [
   "AND" => [
     "OR" => [
