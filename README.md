@@ -245,3 +245,7 @@ $ycdb->select("user_info_test", "id", [
 	"username[~]" => "[!BCR]at" // Eat, Fat, Hat...
 ]);
 ```
+
+- Order by _排序_
+```php
+```
