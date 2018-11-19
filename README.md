@@ -95,5 +95,5 @@ echo $ret; //ret is 3
 $ret = $ycdb->query("select * from user_info_test where bool_flag=1");
 echo json_encode($ret);
 ```
- ![Image](https://github.com/caohao0730/ycdatabase/blob/master/image-folder/select.jpg)
+ ![Image](https://github.com/caohao0730/ycdatabase/blob/master/image-folder/query_select.jpg)
  
