@@ -38,11 +38,11 @@ $ycdb = new ycdb($options);
 - we need to init pdo connection before we use ycdatabase.
 ```
 try{
-	$ycdb->initialize();
+    $ycdb->initialize();
 } catch (PDOException $e) {
-	echo "find PDOException when initialize\n";
-	var_dump($e);
-	exit;
+    echo "find PDOException when initialize\n";
+    var_dump($e);
+    exit;
 }
 ```
 
