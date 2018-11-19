@@ -78,8 +78,8 @@ if($ret == -1) {
 ```
 
 - update data
-<br>
-![Image](https://github.com/caohao0730/ycdatabase/blob/master/image-folder/table.jpg)
+
+ ![Image](https://github.com/caohao0730/ycdatabase/blob/master/image-folder/table.jpg)
 
 如果我们执行下面update语句，如果目前数据为上图，则 $ret 返回3 <br>
 _if we execute the following update statement, $ret returns 3 if the current data is the above image._
