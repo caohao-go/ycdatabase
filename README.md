@@ -9,6 +9,20 @@
 - PHP 7.0 + 
 - need support **PDO** for mysql
 
+## create a test table
+```
+CREATE TABLE `user_info_test` (
+  `uid` int(11) NOT NULL COMMENT 'userid' AUTO_INCREMENT,
+  `username` varchar(64) NOT NULL COMMENT 'username',
+  `sexuality` varchar(8) DEFAULT 'male' COMMENT 'sexuality：male - 男性  female - 女性',
+  `age` int(11) DEFAULT 0 COMMENT 'age',
+  `height` double(11,2) DEFAULT 0 COMMENT 'height of a person, 身高',
+  `bool_flag` int(11) DEFAULT 1 COMMENT 'flag',
+  `remark` varchar(11) DEFAULT NULL,
+  PRIMARY KEY (`uid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='userinfo';
+```
+
 ## Compire ycdatabase in linux
 ```
 $/path/to/phpize
@@ -47,3 +61,20 @@ try{
 ```
 
 ## Native SQL query
+我们可以通过exec函数直接执行sql语句，返回值为执行结果影响行数，如果 $ret = -1 则说明 sql 执行出错，我们可以通过 $ycdb->errorCode,$ycdb->errorInfo() 分别返回错误代码、错误描述。
+
+
+```
+$ret = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) values('smallhow', 'male', 29, 180)");
+if($ret == -1) {
+	$code = $ycdb->errorCode();
+	$info = $ycdb->errorInfo();
+	echo "code:" . $code . "\n";
+	echo "info:" . $info[2] . "\n";
+} else {
+	echo $ret;
+}
+```
+```
+$ret = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) values('smallhow', 'male', 29, 180)");
+```
