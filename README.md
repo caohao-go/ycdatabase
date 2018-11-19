@@ -33,6 +33,7 @@ $make && make install
 ## Start 
 - new ycdb()
 ```
+<?php
 $db_conf = array("host" => "127.0.0.1", 
                  "username" => "root", 
                  "password" => "test123123", 
