@@ -230,3 +230,18 @@ $data = $ycdb->select("user_info_test", "*", [
 ]);
 // WHERE username NOT LIKE '%ide%'
 ```
+
+- Use of wildcards _通配符的使用_
+```
+$ycdb->select("user_info_test", "*", [
+  "username[~]" => "Londo_"  // London, Londox, Londos...
+]);
+
+$ycdb->select("user_info_test", "id", [
+	"username[~]" => "[BCR]at" // Bat, Cat, Rat
+]);
+ 
+$ycdb->select("user_info_test", "id", [
+	"username[~]" => "[!BCR]at" // Eat, Fat, Hat...
+]);
+```
