@@ -99,7 +99,7 @@ echo json_encode($ret);
  
 
 ## Where statement
-- Basic usage
+- Basic usage _基本用法_
 ```
 $ycdb->select("user_info_test", "username", ["sexuality" => "male"]);
 // WHERE sexuality = 'male'
@@ -146,9 +146,9 @@ $data = $ycdb->select("user_info_test", "*", [
 // remark IS NOT NULL
 ```
 
-- Conditional search
+- Conditional Query _条件搜索_ 
 
-You can use "AND" or "OR" to stitch very complex SQL statements.
+You can use "AND" or "OR" to make up very complex SQL statements.
 ```
 $data = $ycdb->select("user_info_test", "*", [
   "AND" => [
@@ -211,4 +211,22 @@ $data = $ycdb->select("user_info_test", "*", [
 ]);
 // [√] SELECT * FROM user_info_test WHERE (age = 29 OR sexuality = 'female') AND (uid != 3 OR height >= 170)
 ```
+- Fuzzy Matching _模糊匹配 Like_
 
+LIKE USAGE [~].
+```
+$data = $ycdb->select("user_info_test", "*", [
+  "username[~]" => "%ide%"
+]);
+// WHERE username LIKE '%ide%'
+
+$data = $ycdb->select("user_info_test", "*", [
+  "username[~]" => ["%ide%", "Jam%", "%ace"]
+]);
+// WHERE username LIKE '%ide%' OR username LIKE 'Jam%' OR username LIKE '%ace'
+
+$data = $ycdb->select("user_info_test", "*", [
+  "username[!~]" => "%ide%"
+]);
+// WHERE username NOT LIKE '%ide%'
+```
