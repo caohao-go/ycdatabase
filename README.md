@@ -68,12 +68,12 @@ try{
 $ret = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) 
                     values('smallhow', 'male', 29, 180)");
 if($ret == -1) {
-	$code = $ycdb->errorCode();
-	$info = $ycdb->errorInfo();
-	echo "code:" . $code . "\n";
-	echo "info:" . $info[2] . "\n";
+    $code = $ycdb->errorCode();
+    $info = $ycdb->errorInfo();
+    echo "code:" . $code . "\n";
+    echo "info:" . $info[2] . "\n";
 } else {
-	echo $ret;
+    echo $ret;
 }
 ```
 
@@ -84,4 +84,5 @@ if($ret == -1) {
 if we execute the following update statement, $ret returns 3 if the current data is the above image.
 ```
 $ret = $ycdb->exec("update user_info_test set remark='test' where height>=180");
+echo $ret;
 ```
