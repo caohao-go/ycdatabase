@@ -1,0 +1,5 @@
+#ifndef YCDATABASE_CONFIG_H_
+#define YCDATABASE_CONFIG_H_
+
+
+#endif
