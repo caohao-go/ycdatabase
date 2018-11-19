@@ -61,7 +61,7 @@ try{
 ```
 
 ## Native SQL query
-我们可以通过exec函数直接执行sql语句，返回值为执行结果影响行数，如果 $ret = -1 则说明 sql 执行出错，我们可以通过 $ycdb->errorCode,$ycdb->errorInfo() 分别返回错误代码、错误描述。
+我们可以通过exec函数直接执行sql语句，返回值为执行结果影响行数，以及query函数执行select语句，如果 $ret = -1 则说明 sql 执行出错，我们可以通过 $ycdb->errorCode,$ycdb->errorInfo() 分别返回错误代码、错误描述。
 
 - insert data
 ```
@@ -84,5 +84,13 @@ if($ret == -1) {
 if we execute the following update statement, $ret returns 3 if the current data is the above image.
 ```
 $ret = $ycdb->exec("update user_info_test set remark='test' where height>=180");
-echo $ret;
+echo $ret; //ret is 3
 ```
+
+- select data
+```
+$ret = $ycdb->query("select * from user_info_test where bool_flag=1");
+echo json_encode($ret);
+```
+ ![Image](https://github.com/caohao0730/ycdatabase/blob/master/image-folder/select.jpg)
+ 
