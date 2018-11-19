@@ -124,10 +124,10 @@ $ycdb->select("user_info_test", "username", ["age[><]" => [28, 29]]);
 
 //you can use array
 $data = $ycdb->select("user_info_test", "*", [
-    "OR" =>[
-        "uid" => [2, 3, 4, 7, 9],
-        "username" => ["Tom", "Red", "carlo"]]
-    ]);
+  "OR" =>[
+    "uid" => [2, 3, 4, 7, 9],
+    "username" => ["Tom", "Red", "carlo"]]
+]);
 // WHERE uid in (2, 3, 4, 7, 9) OR username in ('Tom', 'Red', 'carlo')
 
 //Multiple conditional query
@@ -137,7 +137,7 @@ $data = $ycdb->select("user_info_test", "*", [
     "height[!]" => [165, 168, 172],
     "bool_flag" => true,
     "remark[!]" => null
-  ]);
+]);
 // WHERE 
 // uid != 10 AND 
 // username != "James" AND 
