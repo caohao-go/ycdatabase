@@ -18,6 +18,10 @@ ZEND_ARG_INFO(0, query)
 ZEND_ARG_ARRAY_INFO(0, map, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ycdb_query_oo, 0, 0, 1)
+ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ycdb_insert_oo, 0, 0, 2)
 ZEND_ARG_INFO(0, table)
 ZEND_ARG_ARRAY_INFO(0, data, 0)
@@ -42,6 +46,7 @@ static zend_function_entry ycdb_methods[] = {
     PHP_ME(ycdb, errorInfo, arginfo_ycdb_construct_oo, ZEND_ACC_PUBLIC)
     PHP_ME(ycdb, select, arginfo_ycdb_select_oo, ZEND_ACC_PUBLIC)
     PHP_ME(ycdb, exec, arginfo_ycdb_exec_oo, ZEND_ACC_PUBLIC)
+    PHP_ME(ycdb, query, arginfo_ycdb_query_oo, ZEND_ACC_PUBLIC)
     PHP_ME(ycdb, insert, arginfo_ycdb_insert_oo, ZEND_ACC_PUBLIC)
     PHP_ME(ycdb, insert_id, arginfo_ycdatabase_void, ZEND_ACC_PUBLIC)
     PHP_ME(ycdb, update, arginfo_ycdb_update_oo, ZEND_ACC_PUBLIC)
@@ -350,6 +355,59 @@ PHP_METHOD(ycdb, exec) {
     } else {
         RETVAL_ZVAL(statement, 1, 1);
         efree(statement);
+    }
+}
+
+//原生查询query
+PHP_METHOD(ycdb, query) {
+    zval* thisObject = getThis();
+    zval *z_sql = NULL;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_sql) == FAILURE) {
+        RETURN_LONG(-1);
+    }
+
+    if (Z_TYPE_P(z_sql) != IS_STRING) {
+        RETURN_MY_ERROR("Argument 1 passed must be of the type string");
+    }
+	
+    //执行SQL
+	zval *statement = NULL;
+	zval **exec_args[1];
+	exec_args[0] = &z_sql;
+    
+	if (yc_call_user_function_ex_fast(&thisObject, "exec", &statement, 1, exec_args) == FAILURE) {
+    	yc_zval_ptr_dtor(&z_sql);
+    	yc_zval_free(statement);
+		RETURN_LONG(-1);
+    }
+    
+    yc_zval_ptr_dtor(&z_sql);
+    
+    if(YC_IS_NOT_NULL(statement) && Z_TYPE_P(statement) == IS_OBJECT) { //获取结果
+        zval **fetch_args[1];
+        zval *result = NULL, *fetch_type = NULL;
+        
+        YC_MAKE_STD_ZVAL(fetch_type);
+    	ZVAL_LONG(fetch_type, PDO_FETCH_ASSOC);
+    	
+    	fetch_args[0] = &fetch_type;
+    	
+    	if (yc_call_user_function_ex_fast(&statement, "fetchAll", &result, 1, fetch_args) == FAILURE) {
+	    	yc_zval_free(statement);
+	    	yc_zval_free(result);
+	    	yc_zval_ptr_dtor(&fetch_type);
+			RETURN_LONG(-1);
+	    }
+	    
+	    yc_zval_free(statement);
+	    yc_zval_ptr_dtor(&fetch_type);
+	    
+		RETVAL_ZVAL(result, 1, 1);
+    	efree(result);
+    } else {
+    	yc_zval_free(statement);
+		RETURN_LONG(-1);
     }
 }
 

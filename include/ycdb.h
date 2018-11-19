@@ -26,6 +26,7 @@ PHP_METHOD(ycdb, __destruct);
 PHP_METHOD(ycdb, select);
 PHP_METHOD(ycdb, initialize);
 PHP_METHOD(ycdb, exec);
+PHP_METHOD(ycdb, query);
 PHP_METHOD(ycdb, insert);
 PHP_METHOD(ycdb, insert_id);
 PHP_METHOD(ycdb, update);
