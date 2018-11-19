@@ -61,7 +61,10 @@ try{
 ```
 
 ## Native SQL query
-我们可以通过exec函数直接执行sql语句，返回值为执行结果影响行数，以及query函数执行select语句，如果 $ret = -1 则说明 sql 执行出错，我们可以通过 $ycdb->errorCode,$ycdb->errorInfo() 分别返回错误代码、错误描述。
+
+We can directly execute the sql statement through the exec() function,the return value is the number of rows affected by the execution, and execute select statement through the query() function, If $ret = -1 indicates that the sql execution error occurs, we can pass $ycdb->errorCode(), $ycdb- >errorInfo() returns the error code and error description respectively.<br><br>
+_我们可以通过exec函数直接执行sql语句，返回值为执行结果影响行数，以及query函数执行select语句，如果 $ret = -1 则说明 sql 执行出错，我们可以通过 $ycdb->errorCode,$ycdb->errorInfo() 分别返回错误代码、错误描述。_
+
 
 - insert data
 ```
