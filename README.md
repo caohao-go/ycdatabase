@@ -4,12 +4,25 @@
 ## Instruction
   ycdb is an mysql database orm written in c, built in php extension, as we known, database ORM is a very time-consuming operation, especially for interpretive languages such as PHP, and for a project, the proportion of ORM is very high,so here I will implement the MySQL ORM operation in C language, and use the performance of C language to improve the performance of ORM, and ycdb can solve SQL injection through parameter binding <br><br>
   _ycdb是一个为PHP扩展写的纯C语言写的mysql数据库ORM扩展，众所周知，数据库ORM是一个非常耗时的操作，尤其对于解释性语言如PHP，而且对于一个项目来说，ORM大多数情况能占到项目很大的一个比例，所以这里我将MySQL的ORM操作用C语言实现，利用C语言的性能，提升ORM的性能。同时，ycdb 能通过参数绑定的方式解决SQL注入的问题_
-
+  
+  - Instruction
+  - Requirement
+  - Create test table
+  - Compire ycdatabase in linux
+  - Start ycdatabase
+  - Init ycdb connection
+  - Native SQL query
+  - Where statement
+  - Select statement
+  - Insert statement
+  - Update statement
+  - Delete statement
+  
 ## Requirement
 - PHP 7.0 + 
 - need support **PDO** for mysql
 
-## create a test table
+## Create test table
 ```sql
 CREATE TABLE `user_info_test` (
   `uid` int(11) NOT NULL COMMENT 'userid' AUTO_INCREMENT,
@@ -30,7 +43,7 @@ $./configure --with-php-config=/path/to/php-config
 $make && make install
 ```
 
-## Start 
+## Start ycdatabase
 - new ycdb()
 ```php
 $db_conf = array("host" => "127.0.0.1", 
