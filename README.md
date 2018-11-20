@@ -93,7 +93,7 @@ echo $ret; //ret is 3
 - select data
 ```php
 $ret = $ycdb->query("select * from user_info_test where bool_flag=1");
-echo json_encode($ret);
+var_dump($ret);
 ```
  ![Image](https://github.com/caohao0730/ycdatabase/blob/master/image-folder/query_select.jpg)
  
@@ -239,3 +239,22 @@ $data = $ycdb->select("user_info_test", "*", [
 //SELECT * FROM `user_info_test` WHERE `sexuality` = 'male' ORDER BY `age`, `height` DESC, `uid` ASC LIMIT 100 OFFSET 20
 ```
 
+- GROUP And HAVING
+```php
+$ycdb->select("user_info_test", "uid", [
+	'GROUP' => 'sexuality',
+ 
+	// GROUP by array of values
+	'GROUP' => [
+		'sexuality',
+		'age',
+		'height'
+	],
+ 
+	// Must have to use it with GROUP together
+	'HAVING' => [
+		'age[>]' => 30
+	]
+]);
+//SELECT uid FROM `user_info_test` GROUP BY sexuality,age,height HAVING `age` > 30
+```
