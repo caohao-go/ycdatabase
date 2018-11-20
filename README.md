@@ -233,12 +233,8 @@ $data = $ycdb->select("user_info_test", "*", [
     "height" => "DESC",
     "uid" => "ASC"
   ],
-  'LIMIT' => [
-    //Get the first 100 of rows
-    'LIMIT' => 100,
-    // Started from the top 20 rows, and get the next 100
-    'LIMIT' => [20, 100],
-  ]
+  'LIMIT' => 100,  //Get the first 100 of rows (overwritten by next LIMIT)
+  'LIMIT' => [20, 100]  //Started from the top 20 rows, and get the next 100
 ]);
 //SELECT * FROM `user_info_test` WHERE `sexuality` = 'male' ORDER BY `age`, `height` DESC, `uid` ASC LIMIT 100 OFFSET 20
 ```
