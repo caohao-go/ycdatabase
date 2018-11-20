@@ -273,12 +273,28 @@ $ycdb->select("user_info_test", "sexuality,age,height", [
 ```php
 select($table, $columns, $where)
 ```
-```diff
- +table [string]
-```
+
+#### table [string]
 table name
 
 #### columns [string/array]
 Columns to be queried.
 
+#### where (optional) [array]
+The conditions of the query.
+
+```php
+select($table, $join, $columns, $where)
+```
+#### table [string]
+table name
+
+#### join [array]
+Multi-table query, can be ignored if not used.
+
+#### columns [string/array]
+Columns to be queried.
+
+#### where (optional) [array]
+The conditions of the query.
 
