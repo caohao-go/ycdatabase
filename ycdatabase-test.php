@@ -1,4 +1,16 @@
 <?php
+/*
+  +----------------------------------------------------------------------+
+  | ycdatabase   /   ycdb                                                |
+  +----------------------------------------------------------------------+
+  | ycdb is a php database ORM extension for mysql written in c language |
+  +----------------------------------------------------------------------+
+  | LICENSE: https://github.com/caohao0730/ycdatabase/blob/master/LICENSE|
+  +----------------------------------------------------------------------+
+  | Author: Cao Hao  <649947921@qq.com>                                  |
+  | CreateTime: 2018-11-19                                               |
+  +----------------------------------------------------------------------+
+*/
 $option = array("host" => "47.106.114.151", 
 				"username" => "root", 
 				"password" => "gaoqu123123", 
@@ -112,8 +124,8 @@ $data = $ycdb->select("user_info_test", "*", [
 ]);
 // WHERE (age = 29 OR sexuality='female') AND height = 177
 
-//Attention£º Because ycdb uses array arguments, the first OR is overwritten, the following usage is wrong, 
-//×¢Òâ£º µÚÒ»¸ö OR ±»¸²¸ÇÁË£¬ËùÒÔÕâ¸öÐ´·¨ÊÇ´íÎóµÄ
+//Attentionï¼š Because ycdb uses array arguments, the first OR is overwritten, the following usage is wrong, 
+//æ³¨æ„ï¼š ç¬¬ä¸€ä¸ª OR è¢«è¦†ç›–äº†ï¼Œæ‰€ä»¥è¿™ä¸ªå†™æ³•æ˜¯é”™è¯¯çš„
 $data = $ycdb->select("user_info_test", "*", [
   "AND" => [
     "OR" => [
@@ -129,7 +141,7 @@ $data = $ycdb->select("user_info_test", "*", [
 // [X] SELECT * FROM user_info_test WHERE (uid != 3 OR height >= 170)
 
 //We can use # and comments to distinguish between two diffrents OR
-//ÎÒÃÇ¿ÉÒÔÓÃ # + ×¢ÊÍ À´Çø·ÖÁ½¸ö²»Í¬µÄ OR
+//æˆ‘ä»¬å¯ä»¥ç”¨ # + æ³¨é‡Š æ¥åŒºåˆ†ä¸¤ä¸ªä¸åŒçš„ OR
 $data = $ycdb->select("user_info_test", "*", [
   "AND" => [
     "OR #1" => [
@@ -142,7 +154,7 @@ $data = $ycdb->select("user_info_test", "*", [
     ],
   ]
 ]);
-// [¡Ì] SELECT * FROM user_info_test WHERE (age = 29 OR sexuality = 'female') AND (uid != 3 OR height >= 170)
+// [âˆš] SELECT * FROM user_info_test WHERE (age = 29 OR sexuality = 'female') AND (uid != 3 OR height >= 170)
 
 
 $data = $ycdb->select("user_info_test", "*", [
