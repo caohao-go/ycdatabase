@@ -104,8 +104,7 @@ echo json_encode($ret);
 $ycdb->select("user_info_test", "username", ["sexuality" => "male"]);
 // WHERE sexuality = 'male'
 
-$ycdb->select("user_info_test", "username", ["age" => 29]);
-// WHERE age = 29
+$ycdb->select("user_info_test", "username", ["age" => 29]);  // WHERE age = 29
 
 $ycdb->select("user_info_test", "username", ["age[>]" => 29]);
 // WHERE age > 29
