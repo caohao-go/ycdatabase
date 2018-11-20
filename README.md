@@ -1,6 +1,6 @@
 # ycdatabase
   
-
+<font color='#FF0000' size=7 face="黑体">字体改成红色了</font>
 ## Catalogue
   - Instruction
   - Requirement
@@ -269,3 +269,15 @@ $ycdb->select("user_info_test", "sexuality,age,height", [
 ]);
 //SELECT uid FROM `user_info_test` GROUP BY sexuality,age,height HAVING `age` > 30
 ```
+
+## Select statement
+```php
+select($table, $columns, $where)
+```
+<font color=#FF0000> table [string] </font> <br>
+table name
+
+#### columns [string/array]
+Columns to be queried.
+
+
