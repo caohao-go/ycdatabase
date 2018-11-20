@@ -231,6 +231,9 @@ HAVING `uid`.`num` > 111 AND `type` > 'smart' AND
 ORDER BY  `user`.`score` , `user`.`uid` ASC, `time` DESC 
 LIMIT 33
 */
+
+$columns = ["name(a)", "avatar(b)", "age"];
+
 $table = "table_a(a)";
 
 $join = [
@@ -238,8 +241,6 @@ $join = [
 	"[<]BBBB" => ["E1", "E2", "E3"],
 	"[>]CCCC(c1)" => [ "GG" => "HH", "II.KK" => "LL"]
 ];
-
-$columns = ["name(a)", "avatar(b)", "age"];
 
 $where =  [
 	"user.email[!]" => ["foo@bar.com", "cat@dog.com", "admin@ycdb.in"],
