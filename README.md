@@ -270,6 +270,7 @@ $ycdb->select("user_info_test", "sexuality,age,height", [
 ```
 
 ## Select statement
+- usage
 ```php
 select($table, $columns, $where)
 ```
@@ -298,3 +299,41 @@ Columns to be queried.
 #### where (optional) [array]
 The conditions of the query.
 
+```php
+return: [array]
+```
+
+- example
+You can use * to match all fields, but if you specify columns you can improve performance.<br>
+_你可以使用*来匹配所有字段, 但如果你指名字段名可以很好的提高性能._
+```php
+$datas = $ycdb->select("user_info_test", [
+    "uid",
+    "username"
+], [
+    "age[>]" => 31
+]);
+
+// $datas = array(
+//  [0] => array(
+//      "uid" => 6,
+//      "username" => "Aiden"
+//  ),
+//  [1] => array(
+//      "uid" => 11,
+//      "username" => "smallhow"
+//  )
+// )
+
+// Select all columns
+$datas = $ycdb->select("user_info_test", "*");
+
+// Select a column
+$datas = $ycdb->select("user_info_test", "username");
+ 
+// $datas = array(
+//  [0] => "lucky",
+//  [1] => "Tom",
+//  [2] => "Red"
+// )
+```
