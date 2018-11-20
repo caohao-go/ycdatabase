@@ -246,6 +246,22 @@ $ycdb->select("user_info_test", "id", [
 ]);
 ```
 
-- Order by _排序_
+- ORDER BY And LIMIT _排序和limit_
 ```php
+$data = $ycdb->select("user_info_test", "*", [
+  'sexuality' => 'male',
+  'ORDER' => [
+    "age",
+    "height" => "DESC",
+    "uid" => "ASC"
+  ],
+  'LIMIT' => [
+    //Get the first 100 of rows
+    'LIMIT' => 100,
+    // Started from the top 20 rows, and get the next 100
+    'LIMIT' => [20, 100],
+  ]
+]);
+///SELECT * FROM `user_info_test` WHERE `sexuality` = 'male' ORDER BY `age`, `height` DESC, `uid` ASC LIMIT 100 OFFSET 20
 ```
+
