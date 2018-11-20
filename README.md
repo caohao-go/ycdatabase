@@ -106,20 +106,15 @@ $ycdb->select("user_info_test", "username", ["sexuality" => "male"]);
 
 $ycdb->select("user_info_test", "username", ["age" => 29]);  // WHERE age = 29
 
-$ycdb->select("user_info_test", "username", ["age[>]" => 29]);
-// WHERE age > 29
+$ycdb->select("user_info_test", "username", ["age[>]" => 29]); // WHERE age > 29
 
-$ycdb->select("user_info_test", "username", ["age[>=]" => 29]);
-// WHERE age >= 29
+$ycdb->select("user_info_test", "username", ["age[>=]" => 29]); // WHERE age >= 29
 
-$ycdb->select("user_info_test", "username", ["age[!]" => 29]);
-// WHERE age != 29
+$ycdb->select("user_info_test", "username", ["age[!]" => 29]); // WHERE age != 29
 
-$ycdb->select("user_info_test", "username", ["age[<>]" => [28, 29]]);
-// WHERE age  BETWEEN 28 AND 29
+$ycdb->select("user_info_test", "username", ["age[<>]" => [28, 29]]); // WHERE age  BETWEEN 28 AND 29
 
-$ycdb->select("user_info_test", "username", ["age[><]" => [28, 29]]);
-// WHERE age NOT BETWEEN 28 AND 29
+$ycdb->select("user_info_test", "username", ["age[><]" => [28, 29]]); // WHERE age NOT BETWEEN 28 AND 29
 
 //you can use array
 $data = $ycdb->select("user_info_test", "*", [
@@ -149,15 +144,6 @@ $data = $ycdb->select("user_info_test", "*", [
 
 You can use "AND" or "OR" to make up very complex SQL statements.
 ```php
-$data = $ycdb->select("user_info_test", "*", [
-  "AND" => [
-    "uid[>]" => 3,
-    "age[<>]" => [28, 29],
-    "sexuality" => "female"
-  ]
-]);
-// WHERE uid > 3 AND age BETWEEN 29 AND 29 AND sexuality = 'female'
-
 $data = $ycdb->select("user_info_test", "*", [
   "OR" => [
     "uid[>]" => 3,
@@ -214,9 +200,7 @@ $data = $ycdb->select("user_info_test", "*", [
 
 LIKE USAGE [~].
 ```php
-$data = $ycdb->select("user_info_test", "*", [
-  "username[~]" => "%ide%"
-]);
+$data = $ycdb->select("user_info_test", "*", [ "username[~]" => "%ide%" ]);
 // WHERE username LIKE '%ide%'
 
 $data = $ycdb->select("user_info_test", "*", [
@@ -224,25 +208,20 @@ $data = $ycdb->select("user_info_test", "*", [
 ]);
 // WHERE username LIKE '%ide%' OR username LIKE 'Jam%' OR username LIKE '%ace'
 
-$data = $ycdb->select("user_info_test", "*", [
-  "username[!~]" => "%ide%"
-]);
+$data = $ycdb->select("user_info_test", "*", [ "username[!~]" => "%ide%" ]);
 // WHERE username NOT LIKE '%ide%'
 ```
 
 - Use of wildcards _通配符的使用_
 ```php
-$ycdb->select("user_info_test", "*", [
-  "username[~]" => "Londo_"  // London, Londox, Londos...
-]);
+$ycdb->select("user_info_test", "*", [ "username[~]" => "Londo_" ]);
+// London, Londox, Londos...
 
-$ycdb->select("user_info_test", "id", [
-	"username[~]" => "[BCR]at" // Bat, Cat, Rat
-]);
- 
-$ycdb->select("user_info_test", "id", [
-	"username[~]" => "[!BCR]at" // Eat, Fat, Hat...
-]);
+$ycdb->select("user_info_test", "id", [ "username[~]" => "[BCR]at" ]);
+// Bat, Cat, Rat
+
+$ycdb->select("user_info_test", "id", [	"username[~]" => "[!BCR]at" ]);
+// Eat, Fat, Hat...
 ```
 
 - ORDER BY And LIMIT _排序和limit_
@@ -261,6 +240,6 @@ $data = $ycdb->select("user_info_test", "*", [
     'LIMIT' => [20, 100],
   ]
 ]);
-///SELECT * FROM `user_info_test` WHERE `sexuality` = 'male' ORDER BY `age`, `height` DESC, `uid` ASC LIMIT 100 OFFSET 20
+//SELECT * FROM `user_info_test` WHERE `sexuality` = 'male' ORDER BY `age`, `height` DESC, `uid` ASC LIMIT 100 OFFSET 20
 ```
 
