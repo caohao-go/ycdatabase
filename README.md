@@ -169,8 +169,8 @@ $data = $ycdb->select("user_info_test", "*", [
 $data = $ycdb->select("user_info_test", "*", [
   "AND" => [
     "OR" => [
-            "age" => 29,
-            "sexuality" => "female"
+      "age" => 29,
+      "sexuality" => "female"
     ],
     "height" => 177
   ]
@@ -182,12 +182,12 @@ $data = $ycdb->select("user_info_test", "*", [
 $data = $ycdb->select("user_info_test", "*", [
   "AND" => [
     "OR" => [
-            "age" => 29,
-            "sexuality" => "female"
+      "age" => 29,
+      "sexuality" => "female"
     ],
     "OR" => [
-            "uid[!]" => 3,
-            "height[>=]" => 170
+      "uid[!]" => 3,
+      "height[>=]" => 170
     ],
   ]
 ]);
@@ -198,12 +198,12 @@ $data = $ycdb->select("user_info_test", "*", [
 $data = $ycdb->select("user_info_test", "*", [
   "AND" => [
     "OR #1" => [
-            "age" => 29,
-            "sexuality" => "female"
+      "age" => 29,
+      "sexuality" => "female"
     ],
     "OR #2" => [
-            "uid[!]" => 3,
-            "height[>=]" => 170
+      "uid[!]" => 3,
+      "height[>=]" => 170
     ],
   ]
 ]);
@@ -227,14 +227,11 @@ $data = $ycdb->select("user_info_test", "*", [ "username[!~]" => "%ide%" ]);
 
 - Use of wildcards _通配符的使用_
 ```php
-$ycdb->select("user_info_test", "*", [ "username[~]" => "Londo_" ]);
-// London, Londox, Londos...
+$ycdb->select("user_info_test", "*", [ "username[~]" => "Londo_" ]); // London, Londox, Londos...
 
-$ycdb->select("user_info_test", "id", [ "username[~]" => "[BCR]at" ]);
-// Bat, Cat, Rat
+$ycdb->select("user_info_test", "id", [ "username[~]" => "[BCR]at" ]); // Bat, Cat, Rat
 
-$ycdb->select("user_info_test", "id", [	"username[~]" => "[!BCR]at" ]);
-// Eat, Fat, Hat...
+$ycdb->select("user_info_test", "id", [	"username[~]" => "[!BCR]at" ]); // Eat, Fat, Hat...
 ```
 
 - ORDER BY And LIMIT _排序和limit_
@@ -255,19 +252,19 @@ $data = $ycdb->select("user_info_test", "*", [
 - GROUP And HAVING
 ```php
 $ycdb->select("user_info_test", "sexuality,age,height", [
-	'GROUP' => 'sexuality',
+  'GROUP' => 'sexuality',
  
-	// GROUP by array of values
-	'GROUP' => [
-		'sexuality',
-		'age',
-		'height'
-	],
+  // GROUP by array of values
+  'GROUP' => [
+    'sexuality',
+    'age',
+    'height'
+  ],
  
-	// Must have to use it with GROUP together
-	'HAVING' => [
-		'age[>]' => 30
-	]
+  // Must have to use it with GROUP together
+  'HAVING' => [
+    'age[>]' => 30
+  ]
 ]);
 //SELECT uid FROM `user_info_test` GROUP BY sexuality,age,height HAVING `age` > 30
 ```
