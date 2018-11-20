@@ -79,7 +79,7 @@ We can directly execute the sql statement through the exec() function,the return
 _我们可以通过exec函数直接执行sql语句，返回值为执行结果影响行数，以及query函数执行select语句，如果 $ret = -1 则说明 sql 执行出错，我们可以通过 $ycdb->errorCode,$ycdb->errorInfo() 分别返回错误代码、错误描述。_
 
 
-### insert data
+- insert data
 ```php
 $ret = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) 
                     values('smallhow', 'male', 29, 180)");
@@ -93,7 +93,7 @@ if($ret == -1) {
 }
 ```
 
-### update data
+- update data
 
  ![Image](https://github.com/caohao0730/ycdatabase/blob/master/image-folder/table.jpg)
 
@@ -103,7 +103,7 @@ $ret = $ycdb->exec("update user_info_test set remark='test' where height>=180");
 echo $ret; //ret is 3
 ```
 
-### select data
+- select data
 ```php
 $ret = $ycdb->query("select * from user_info_test where bool_flag=1");
 var_dump($ret);
@@ -271,39 +271,39 @@ $ycdb->select("user_info_test", "sexuality,age,height", [
 
 ## Select statement
 - usage
+
 ```php
 select($table, $columns, $where)
 ```
 
-#### table [string]
+##### table [string]
 table name
 
-#### columns [string/array]
+##### columns [string/array]
 Columns to be queried.
 
-#### where (optional) [array]
+##### where (optional) [array]
 The conditions of the query.
 
 ```php
 select($table, $join, $columns, $where)
 ```
-#### table [string]
+##### table [string]
 table name
 
-#### join [array]
+##### join [array]
 Multi-table query, can be ignored if not used.
 
-#### columns [string/array]
+##### columns [string/array]
 Columns to be queried.
 
-#### where (optional) [array]
+##### where (optional) [array]
 The conditions of the query.
 
-```php
-return: [array]
-```
+##### return: [array]
 
 - example
+
 You can use * to match all fields, but if you specify columns you can improve performance.<br>
 _你可以使用*来匹配所有字段, 但如果你指名字段名可以很好的提高性能._
 ```php
