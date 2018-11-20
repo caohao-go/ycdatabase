@@ -254,7 +254,7 @@ $data = $ycdb->select("user_info_test", "*", [
 
 - GROUP And HAVING
 ```php
-$ycdb->select("user_info_test", "uid", [
+$ycdb->select("user_info_test", "sexuality,age,height", [
 	'GROUP' => 'sexuality',
  
 	// GROUP by array of values
