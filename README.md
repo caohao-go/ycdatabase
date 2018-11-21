@@ -445,5 +445,8 @@ if($ret == -1) {
 	echo "info:" . $info[2] . "\n";
 }
 
-$ret = $ycdb->insert_id();
+//If you want to get the ID of the last inserted row, you need to call the insert_id() method separately.
+$uid = $ycdb->insert_id();
 ```
+
+
