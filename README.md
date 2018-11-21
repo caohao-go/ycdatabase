@@ -309,10 +309,10 @@ You can use * to match all fields, but if you specify columns you can improve pe
 _你可以使用*来匹配所有字段, 但如果你指名字段名可以很好的提高性能._
 ```php
 $datas = $ycdb->select("user_info_test", [
-    "uid",
-    "username"
+  "uid",
+  "username"
 ], [
-    "age[>]" => 31
+  "age[>]" => 31
 ]);
 
 // $datas = array(
@@ -338,3 +338,8 @@ $datas = $ycdb->select("user_info_test", "username");
 //  [2] => "Red"
 // )
 ```
+<br>
+- Table join
+Multi-table query SQL is more complicated, and it can be easily solved with ycdb.
+_多表查询SQL较为复杂，使用ycdb可以轻松的解决它_
+
