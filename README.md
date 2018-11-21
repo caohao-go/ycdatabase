@@ -342,7 +342,7 @@ $datas = $ycdb->select("user_info_test", "username");
 
 - Table join
 
-Multi-table query SQL is more complicated, and it can be easily solved with ycdb.
+Multi-table query SQL is more complicated, and it can be easily solved with ycdb.<br>
 _多表查询SQL较为复杂，使用ycdb可以轻松的解决它_
 
 ```php
