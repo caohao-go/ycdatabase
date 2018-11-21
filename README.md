@@ -8,6 +8,7 @@
   - Start ycdatabase
   - Init ycdb connection
   - Native SQL query
+  - Error
   - Where statement
   - Select statement
   - Insert statement
