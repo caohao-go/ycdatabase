@@ -8,7 +8,7 @@
   - Start ycdatabase
   - Init ycdb connection
   - Native SQL query
-  - Error
+  - Error Info
   - Where statement
   - Select statement
   - Insert statement
@@ -112,7 +112,7 @@ var_dump($ret);
 ```
  ![Image](https://github.com/caohao0730/ycdatabase/blob/master/image-folder/query_select.jpg)
  
-## Error 
+## Error Info
 
 Error codes and error messages can be obtained through the errorCode and errorInfo function<br>
 _可以通过 errorCode() 和errorInfo() 函数获取错误码和错误信息_
