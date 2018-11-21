@@ -419,3 +419,31 @@ $data = $ycdb->select("user_info_test(uinfo)", [
 // FROM `user_info_test` AS `uinfo` 
 // LEFT JOIN `account` AS `A` USING (`userid`)
 ```
+
+## Insert statement
+
+```php
+insert($table, $data)
+```
+#### table [string]
+> table name
+
+#### data [array]
+> insert data
+
+#### return [int]
+>Fail if -1 is returned, otherwise the number of inserted records is returned<br>
+>_如果返回 -1 则失败，否则返回插入记录数_
+ 
+```php
+$data = array('username' => 'smallhow','sexuality' => 'male','age' => 35, 'height' => '168');
+$ret = $ycdb->insert("user_info_test", $data);
+if($ret == -1) {
+	$code = $ycdb->errorCode();
+	$info = $ycdb->errorInfo();
+	echo "code:" . $code . "\n";
+	echo "info:" . $info[2] . "\n";
+}
+
+$ret = $ycdb->insert_id();
+```
