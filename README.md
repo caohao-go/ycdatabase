@@ -110,6 +110,15 @@ var_dump($ret);
 ```
  ![Image](https://github.com/caohao0730/ycdatabase/blob/master/image-folder/query_select.jpg)
  
+## Error 
+
+Error codes and error messages can be obtained through the errorCode and errorInfo function<br>
+_可以通过 errorCode() 和errorInfo() 函数获取错误码和错误信息_
+
+```php
+$code = $ycdb->errorCode();
+$info = $ycdb->errorInfo();
+```
 
 ## Where statement
 - Basic usage _基本用法_
@@ -447,6 +456,50 @@ if($ret == -1) {
 
 //If you want to get the ID of the last inserted row, you need to call the insert_id() method separately.
 $uid = $ycdb->insert_id();
+```
+
+## Update statement
+
+```php
+update($table, $data, $where)
+```
+#### table [string]
+> table name
+
+#### data [array]
+> update data
+
+#### where (optional) [array]
+> where condition [可选]
+
+#### return [int]
+>Fail if -1 is returned, otherwise the number of update records is returned<br>
+>_如果返回 -1 则失败，否则返回更新记录数_
+
+```php
+$data = array('height' => 182,'age' => 33);
+$where = array('username' => 'smallhow');
+$ret = $ycdb->update("user_info_test", $data, $where);
+```
+
+## Delete statement
+
+```php
+delete($table, $where)
+```
+#### table [string]
+> table name
+
+#### where (optional) [array]
+> where condition [可选]
+
+#### return [int]
+>Fail if -1 is returned, otherwise the number of delete records is returned<br>
+>_如果返回 -1 则失败，否则返回删除记录数_
+
+```php
+$where = array('username' => 'smallhow');
+$ret = $ycdb->delete("user_info_test", $where);
 ```
 
 
