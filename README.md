@@ -342,4 +342,59 @@ $datas = $ycdb->select("user_info_test", "username");
 - Table join
 Multi-table query SQL is more complicated, and it can be easily solved with ycdb.
 _多表查询SQL较为复杂，使用ycdb可以轻松的解决它_
+```php
+// [>] == RIGH JOIN
+// [<] == LEFT JOIN
+// [<>] == FULL JOIN
+// [><] == INNER JOIN
 
+$ycdb->select("user_info_test",
+[ // Table Join Info
+  "[>]account" => ["uid" => "userid"], // RIGHT JOIN `account` ON `user_info_test`.`uid`= `account`.`userid`
+ 
+  // This is a shortcut to declare the relativity if the row name are the same in both table.
+  "[>]album" => "uid", //RIGHT JOIN `album` USING (`uid`) 
+  
+  // Like above, there are two row or more are the same in both table.
+  "[<]detail" => ["uid", "age"], // LEFT JOIN `detail` USING (`uid`,`age`)
+ 
+  // You have to assign the table with alias.
+  "[<]address(addr_alias)" => ["uid" => "userid"], //LEFT JOIN `address` AS `addr_alias` ON `user_info_test`.`uid`=`addr_alias`.`userid`
+ 
+  // You can refer the previous joined table by adding the table name before the column.
+  "[<>]album" => ["account.userid" => "userid"], //FULL JOIN `album` ON  `account`.`userid` = `album`.`userid`
+ 
+  // Multiple condition
+  "[><]account" => [
+    "uid" => "userid",
+    "album.userid" => "userid"
+  ]
+], [ // columns
+  "user_info_test.uid",
+  "user_info_test.age",
+  "addr_alias.country",
+  "addr_alias.city"
+], [ // where condition
+  "user_info_test.uid[>]" => 3,
+  "ORDER" => ["user_info_test.uid" => "DESC"],
+  "LIMIT" => 50
+]);
+
+
+// SELECT 
+//   user_info_test.uid,
+//   user_info_test.age,
+//   addr_alias.country,
+//   addr_alias.city 
+// FROM `user_info_test` 
+// RIGHT JOIN `account` ON `user_info_test`.`uid`= `account`.`userid`  
+// RIGHT JOIN `album` USING (`uid`) 
+// LEFT JOIN `detail` USING (`uid`,`age`) 
+// LEFT JOIN `address` AS `addr_alias` ON `user_info_test`.`uid`=`addr_alias`.`userid` 
+// FULL JOIN `album` ON  `account`.`userid` = `album`.`userid` 
+// INNER JOIN `account` ON `user_info_test`.`uid`= `account`.`userid` 
+//   AND `album`.`userid` = `account`.`userid`  
+// WHERE `user_info_test`.`uid` > 3 
+// ORDER BY  `user_info_test`.`uid` DESC 
+// LIMIT 50
+```
