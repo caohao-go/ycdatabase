@@ -1237,9 +1237,9 @@ char* column_push(zval* columns, zval* map, char** column_query) {
         preg_table_match(Z_STRVAL_P(value), match_column, match_alias);
 
         if (yc_is_string_not_empty(match_column) && yc_is_string_not_empty(match_alias)) {
-            yc_multi_memcpy_auto_realloc(column_query, 5, " `", match_column, "` AS `", match_alias, "`,");
+            yc_multi_memcpy_auto_realloc(column_query, 4, match_column, " AS `", match_alias, "`,");
         } else {
-            yc_multi_memcpy_auto_realloc(column_query, 3, " `", Z_STRVAL_P(value), "`,");
+            yc_multi_memcpy_auto_realloc(column_query, 2, Z_STRVAL_P(value), ",");
         }
 
         YC_HASHTABLE_FOREACH_END();
@@ -1333,7 +1333,7 @@ char* column_quote(char* string, char* table_column) {
     if (strlen(tmp) >= MAX_TABLE_SIZE) {
         yc_php_fatal_error(E_ERROR, "column size is too long, [%s]", string);
     }
-
+    
     if (yc_strpos(tmp, ".") >= 0) {
         if (strlen(tmp) + 5 >= MAX_TABLE_SIZE) {
             yc_php_fatal_error(E_ERROR, "column + alias size is too long, [%s]", string);
