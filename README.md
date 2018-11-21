@@ -14,6 +14,7 @@
   - Insert statement
   - Update statement
   - Delete statement
+  - Whole Example
   
 ## Instruction
   ycdb is an mysql database orm written in c, built in php extension, as we known, database ORM is a very time-consuming operation, especially for interpretive languages such as PHP, and for a project, the proportion of ORM is very high,so here I will implement the MySQL ORM operation in C language, and use the performance of C language to improve the performance of ORM, and ycdb can solve SQL injection through parameter binding. <br><br>
@@ -503,4 +504,101 @@ $where = array('username' => 'smallhow');
 $ret = $ycdb->delete("user_info_test", $where);
 ```
 
+## Whole Example
 
+```php
+/************** the complete example **********************
+SELECT  `name` AS `a`, `avatar` AS `b`, `age` 
+FROM `table_a` AS `a` 
+RIGHT JOIN `AAAA` AS `a1` USING (`id`)  
+LEFT JOIN `BBBB` USING (`E1`,`E2`,`E3`)  
+RIGHT JOIN `CCCC` AS `c1` ON `a`.`GG`=`c1`.`HH` AND `II`.`KK` =`c1`.`LL`  
+WHERE `user`.`email` NOT IN ('foo@bar.com', 'cat@dog.com', 'admin@ycdb.in') AND 
+`user`.`uid` < 11111 AND `uid` >= 222 AND 
+`uid` IS NOT NULL AND 
+`count` NOT IN (36, 57, 89) AND 
+`id` != 1 AND `int_num` != 3 AND `double_num` != 3.76 AND 
+`AA` LIKE '%saa%' AND `BB` NOT LIKE '%sbb' AND 
+(`CC` LIKE '11%' OR `CC` LIKE '22_' OR `CC` LIKE '33%') AND 
+(`DD` NOT LIKE '%44%' OR `DD` NOT LIKE '55%' OR `DD` NOT LIKE '66%') AND 
+(`EE` LIKE '%E11' AND `EE` LIKE 'E22') AND 
+(`FF` LIKE '%F33' OR `FF` LIKE 'F44') AND 
+(`GG` NOT LIKE '%G55' AND `GG` NOT LIKE 'G66') AND 
+(`HH` NOT LIKE 'H77' OR `HH` NOT LIKE 'H88') AND 
+(`II` BETWEEN 1 AND 12) AND NOT 
+(`LL` BETWEEN 1 AND 12)  AND (
+  (`user_name` IS NULL OR `email` = 'foo@bar.com') AND 
+  (`user_name` = 'bar' OR `email` = 'bar@foo.com')
+) AND (`user_name` != 'foo' OR `promoted` != 1) 
+GROUP BY type,age,gender 
+HAVING `uid`.`num` > 111 AND `type` > 'smart' AND 
+	`id` != 0 AND `god3` != 9.86 AND `uid` IS NOT NULL 
+	AND `AA` LIKE 'SSA%' AND (`CC` LIKE '11%' OR `CC` LIKE '22%' OR `CC` LIKE '33%')
+ORDER BY  `user`.`score` , `user`.`uid` ASC, `time` DESC 
+LIMIT 33
+*/
+
+$table = "table_a(a)";
+
+$join = [
+	"[>]AAAA(a1)" => "id",
+	"[<]BBBB" => ["E1", "E2", "E3"],
+	"[>]CCCC(c1)" => [ "GG" => "HH", "II.KK" => "LL"]
+];
+
+$columns = ["name(a)", "avatar(b)", "age"];
+
+$where =  [
+	"user.email[!]" => ["foo@bar.com", "cat@dog.com", "admin@ycdb.in"],
+	"user.uid[<]" => 11111,
+	"uid[>=]" => 222,
+	"uid[!]" => null,
+	"count[!]" => [36, 57, 89],
+	"id[!]" => true,
+	"int_num[!]" => 3,
+	"double_num[!]" => 3.76,
+	"AA[~]" => "%saa%",
+	"BB[!~]" => "%sbb",
+	"CC[~]" => ["11%", "22_", "33%"],
+	"DD[!~]" => ["%44%", "55%", "66%"],
+	"EE[~]" => ["AND" => ["%E11", "E22"]],
+	"FF[~]" => ["OR" => ["%F33", "F44"]],
+	"GG[!~]" => ["AND" => ["%G55", "G66"]],
+	"HH[!~]" => ["OR" => ["H77", "H88"]],
+	"II[<>]" => ["1", "12"],
+	"LL[><]" => ["1", "12"],
+	"AND #1" => [
+		"OR #1" => [
+			"user_name" => null,
+			"email" => "foo@bar.com",
+		],
+		"OR #2" => [
+			"user_name" => "bar",
+			"email" => "bar@foo.com"
+		]
+	],
+	"OR" => [
+		"user_name[!]" => "foo",
+		"promoted[!]" => true
+	],
+	'GROUP' => 'userid',
+	'GROUP' => ['type', 'age', 'gender'],
+	'HAVING' => [
+		"uid.num[>]" => 111,
+		"type[>]" => "smart",
+		"id[!]" => false,
+		"god3[!]" => 9.86,
+		"uid[!]" => null,
+		"AA[~]" => "SSA%",
+		"CC[~]" => ["11%", "22%", "%33"],
+	],
+	'ORDER' => [
+		"user.score",
+		"user.uid" => "ASC",
+		"time" => "DESC",
+	],
+	"LIMIT" => 33,
+];
+
+$ycdb->select($table, $join, $columns, $where);
+```
