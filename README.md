@@ -57,7 +57,7 @@ $db_conf = array("host" => "127.0.0.1",
                         PDO::ATTR_CASE => PDO::CASE_NATURAL,
                         PDO::ATTR_TIMEOUT => 2));
 
-$ycdb = new ycdb($options);
+$ycdb = new ycdb($db_conf);
 ```
 
   we can start by creating a ycdatabase object (ycdb) from the obove code, db_conf include host,username,password,dbname,port and option, option is a pdo attribution, you can get the detail from http://php.net/manual/en/pdo.setattribute.php, For example, PDO::ATTR_TIMEOUT in the above code is specifies the timeout duration in seconds, and PDO::ATTR_CASE is forcing column names to a specific case.<br><br>
