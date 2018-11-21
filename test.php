@@ -11,10 +11,10 @@
   | CreateTime: 2018-11-19                                               |
   +----------------------------------------------------------------------+
 */
-$option = array("host" => "47.106.114.151", 
+$option = array("host" => "127.0.0.1",
 				"username" => "root", 
-				"password" => "gaoqu123123", 
-				"dbname" => "dabaojian", 
+				"password" => "test",
+				"dbname" => "test",
 				"port" => '3306', 
 				'option' => array(
 					PDO::ATTR_CASE => PDO::CASE_NATURAL,
