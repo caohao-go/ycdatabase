@@ -401,3 +401,21 @@ $ycdb->select("user_info_test",
 // ORDER BY  `user_info_test`.`uid` DESC 
 // LIMIT 50
 ```
+
+- alias
+
+You can use aliases to prevent field conflicts<br>
+_你可以使用别名，以防止字段冲突_
+
+```php
+$data = $ycdb->select("user_info_test(uinfo)", [
+  "[<]account(A)" => "userid",
+], [
+  "uinfo.uid(uid)",
+  "A.userid"
+]);
+
+// SELECT uinfo.uid AS `uid`, A.userid 
+// FROM `user_info_test` AS `uinfo` 
+// LEFT JOIN `account` AS `A` USING (`userid`)
+```
