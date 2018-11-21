@@ -301,9 +301,7 @@ select($table, $join, $columns, $where)
 > The conditions of the query.
 
 #### return: [array]
-
-
-
+<br><br>
 - example
 
 You can use * to match all fields, but if you specify columns you can improve performance.<br>
