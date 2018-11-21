@@ -295,10 +295,10 @@ select($table, $join, $columns, $where)
   Multi-table query, can be ignored if not used.
 
 #### columns [string/array]
-  Columns to be queried.
+>> Columns to be queried.
 
 #### where (optional) [array]
-  The conditions of the query.
+>> The conditions of the query.
 
 #### return: [array]
 
