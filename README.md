@@ -156,12 +156,8 @@ $data = $ycdb->select("user_info_test", "*", [
     "bool_flag" => true,
     "remark[!]" => null
 ]);
-// WHERE 
-// uid != 10 AND 
-// username != "James" AND 
-// height NOT IN ( 165, 168, 172) AND 
-// bool_flag = 1 AND 
-// remark IS NOT NULL
+// WHERE uid != 10 AND username != "James" AND height NOT IN ( 165, 168, 172) AND 
+// bool_flag = 1 AND remark IS NOT NULL
 ```
 
 - Conditional Query _条件搜索_ 
@@ -227,9 +223,7 @@ LIKE USAGE [~].
 $data = $ycdb->select("user_info_test", "*", [ "username[~]" => "%ide%" ]);
 // WHERE username LIKE '%ide%'
 
-$data = $ycdb->select("user_info_test", "*", [
-  "username[~]" => ["%ide%", "Jam%", "%ace"]
-]);
+$data = $ycdb->select("user_info_test", "*", ["username[~]" => ["%ide%", "Jam%", "%ace"]]);
 // WHERE username LIKE '%ide%' OR username LIKE 'Jam%' OR username LIKE '%ace'
 
 $data = $ycdb->select("user_info_test", "*", [ "username[!~]" => "%ide%" ]);
@@ -450,10 +444,10 @@ insert($table, $data)
 $data = array('username' => 'smallhow','sexuality' => 'male','age' => 35, 'height' => '168');
 $ret = $ycdb->insert("user_info_test", $data);
 if($ret == -1) {
-	$code = $ycdb->errorCode();
-	$info = $ycdb->errorInfo();
-	echo "code:" . $code . "\n";
-	echo "info:" . $info[2] . "\n";
+  $code = $ycdb->errorCode();
+  $info = $ycdb->errorInfo();
+  echo "code:" . $code . "\n";
+  echo "info:" . $info[2] . "\n";
 }
 
 //If you want to get the ID of the last inserted row, you need to call the insert_id() method separately.
@@ -541,63 +535,63 @@ LIMIT 33
 $table = "table_a(a)";
 
 $join = [
-	"[>]AAAA(a1)" => "id",
-	"[<]BBBB" => ["E1", "E2", "E3"],
-	"[>]CCCC(c1)" => [ "GG" => "HH", "II.KK" => "LL"]
+  "[>]AAAA(a1)" => "id",
+  "[<]BBBB" => ["E1", "E2", "E3"],
+  "[>]CCCC(c1)" => [ "GG" => "HH", "II.KK" => "LL"]
 ];
 
 $columns = ["name(a)", "avatar(b)", "age"];
 
 $where =  [
-	"user.email[!]" => ["foo@bar.com", "cat@dog.com", "admin@ycdb.in"],
-	"user.uid[<]" => 11111,
-	"uid[>=]" => 222,
-	"uid[!]" => null,
-	"count[!]" => [36, 57, 89],
-	"id[!]" => true,
-	"int_num[!]" => 3,
-	"double_num[!]" => 3.76,
-	"AA[~]" => "%saa%",
-	"BB[!~]" => "%sbb",
-	"CC[~]" => ["11%", "22_", "33%"],
-	"DD[!~]" => ["%44%", "55%", "66%"],
-	"EE[~]" => ["AND" => ["%E11", "E22"]],
-	"FF[~]" => ["OR" => ["%F33", "F44"]],
-	"GG[!~]" => ["AND" => ["%G55", "G66"]],
-	"HH[!~]" => ["OR" => ["H77", "H88"]],
-	"II[<>]" => ["1", "12"],
-	"LL[><]" => ["1", "12"],
-	"AND #1" => [
-		"OR #1" => [
-			"user_name" => null,
-			"email" => "foo@bar.com",
-		],
-		"OR #2" => [
-			"user_name" => "bar",
-			"email" => "bar@foo.com"
-		]
-	],
-	"OR" => [
-		"user_name[!]" => "foo",
-		"promoted[!]" => true
-	],
-	'GROUP' => 'userid',
-	'GROUP' => ['type', 'age', 'gender'],
-	'HAVING' => [
-		"uid.num[>]" => 111,
-		"type[>]" => "smart",
-		"id[!]" => false,
-		"god3[!]" => 9.86,
-		"uid[!]" => null,
-		"AA[~]" => "SSA%",
-		"CC[~]" => ["11%", "22%", "%33"],
-	],
-	'ORDER' => [
-		"user.score",
-		"user.uid" => "ASC",
-		"time" => "DESC",
-	],
-	"LIMIT" => 33,
+  "user.email[!]" => ["foo@bar.com", "cat@dog.com", "admin@ycdb.in"],
+  "user.uid[<]" => 11111,
+  "uid[>=]" => 222,
+  "uid[!]" => null,
+  "count[!]" => [36, 57, 89],
+  "id[!]" => true,
+  "int_num[!]" => 3,
+  "double_num[!]" => 3.76,
+  "AA[~]" => "%saa%",
+  "BB[!~]" => "%sbb",
+  "CC[~]" => ["11%", "22_", "33%"],
+  "DD[!~]" => ["%44%", "55%", "66%"],
+  "EE[~]" => ["AND" => ["%E11", "E22"]],
+  "FF[~]" => ["OR" => ["%F33", "F44"]],
+  "GG[!~]" => ["AND" => ["%G55", "G66"]],
+  "HH[!~]" => ["OR" => ["H77", "H88"]],
+  "II[<>]" => ["1", "12"],
+  "LL[><]" => ["1", "12"],
+    "AND #1" => [
+        "OR #1" => [
+          "user_name" => null,
+          "email" => "foo@bar.com",
+        ],
+        "OR #2" => [
+          "user_name" => "bar",
+          "email" => "bar@foo.com"
+        ]
+    ],
+    "OR" => [
+        "user_name[!]" => "foo",
+        "promoted[!]" => true
+    ],
+    'GROUP' => 'userid',
+    'GROUP' => ['type', 'age', 'gender'],
+    'HAVING' => [
+        "uid.num[>]" => 111,
+        "type[>]" => "smart",
+        "id[!]" => false,
+        "god3[!]" => 9.86,
+        "uid[!]" => null,
+        "AA[~]" => "SSA%",
+        "CC[~]" => ["11%", "22%", "%33"],
+    ],
+    'ORDER' => [
+        "user.score",
+        "user.uid" => "ASC",
+        "time" => "DESC",
+    ],
+    "LIMIT" => 33,
 ];
 
 $ycdb->select($table, $join, $columns, $where);
