@@ -140,13 +140,7 @@ $ycdb->select("user_info_test", "username", ["age[<>]" => [28, 29]]); // WHERE a
 
 $ycdb->select("user_info_test", "username", ["age[><]" => [28, 29]]); // WHERE age NOT BETWEEN 28 AND 29
 
-//you can use array
-$data = $ycdb->select("user_info_test", "*", [
-  "OR" =>[
-    "uid" => [2, 3, 4, 7, 9],
-    "username" => ["Tom", "Red", "carlo"]]
-]);
-// WHERE uid in (2, 3, 4, 7, 9) OR username in ('Tom', 'Red', 'carlo')
+$ycdb->select("user_info_test", "username", ["username" => ["Tom", "Red", "carlo"]]); // WHERE username in ('Tom', 'Red', 'carlo')
 
 //Multiple conditional query
 $data = $ycdb->select("user_info_test", "*", [
@@ -156,8 +150,7 @@ $data = $ycdb->select("user_info_test", "*", [
     "bool_flag" => true,
     "remark[!]" => null
 ]);
-// WHERE uid != 10 AND username != "James" AND height NOT IN ( 165, 168, 172) AND 
-// bool_flag = 1 AND remark IS NOT NULL
+// WHERE uid != 10 AND username != "James" AND height NOT IN ( 165, 168, 172) AND bool_flag = 1 AND remark IS NOT NULL
 ```
 
 - Conditional Query _条件搜索_ 
