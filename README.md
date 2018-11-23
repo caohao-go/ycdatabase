@@ -125,22 +125,22 @@ $info = $ycdb->errorInfo();
 ## Where statement
 - Basic usage _基本用法_
 ```php
-$ycdb->select("user_info_test", "username", ["sexuality" => "male"]);
+$ycdb->select("user_info_test", "*", ["sexuality" => "male"]);
 // WHERE sexuality = 'male'
 
-$ycdb->select("user_info_test", "username", ["age" => 29]);  // WHERE age = 29
+$ycdb->select("user_info_test", "*", ["age" => 29]);  // WHERE age = 29
 
-$ycdb->select("user_info_test", "username", ["age[>]" => 29]); // WHERE age > 29
+$ycdb->select("user_info_test", "*", ["age[>]" => 29]); // WHERE age > 29
 
-$ycdb->select("user_info_test", "username", ["age[>=]" => 29]); // WHERE age >= 29
+$ycdb->select("user_info_test", "*", ["age[>=]" => 29]); // WHERE age >= 29
 
-$ycdb->select("user_info_test", "username", ["age[!]" => 29]); // WHERE age != 29
+$ycdb->select("user_info_test", "*", ["age[!]" => 29]); // WHERE age != 29
 
-$ycdb->select("user_info_test", "username", ["age[<>]" => [28, 29]]); // WHERE age  BETWEEN 28 AND 29
+$ycdb->select("user_info_test", "*", ["age[<>]" => [28, 29]]); // WHERE age  BETWEEN 28 AND 29
 
-$ycdb->select("user_info_test", "username", ["age[><]" => [28, 29]]); // WHERE age NOT BETWEEN 28 AND 29
+$ycdb->select("user_info_test", "*", ["age[><]" => [28, 29]]); // WHERE age NOT BETWEEN 28 AND 29
 
-$ycdb->select("user_info_test", "username", ["username" => ["Tom", "Red", "carlo"]]); // WHERE username in ('Tom', 'Red', 'carlo')
+$ycdb->select("user_info_test", "*", ["username" => ["Tom", "Red", "carlo"]]); // WHERE username in ('Tom', 'Red', 'carlo')
 
 //Multiple conditional query
 $data = $ycdb->select("user_info_test", "*", [
