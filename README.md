@@ -591,7 +591,7 @@ $where =  [
 $ycdb->select($table, $join, $columns, $where);
 ```
 
-- Database transaction
+## Database transaction
 
 ```php
 $ycdb->begin();
