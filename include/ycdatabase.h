@@ -205,7 +205,6 @@ static yc_inline int yc_call_user_function_return_bool_or_unsigned(zval** object
 
     int ret = yc_call_user_function_ex(EG(function_table), object_pp, _function_name, &retval, param_count, params, 0, NULL TSRMLS_CC);
     yc_zval_ptr_dtor(&_function_name);
-    
     if (ret == FAILURE) {
     	yc_zval_ptr_dtor(&retval);
     	return FAILURE;

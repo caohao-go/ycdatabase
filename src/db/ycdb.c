@@ -64,6 +64,9 @@ static zend_function_entry ycdb_methods[] = {
     PHP_ME(ycdb, update, arginfo_ycdb_update_oo, ZEND_ACC_PUBLIC)
     PHP_ME(ycdb, delete, arginfo_ycdb_delete_oo, ZEND_ACC_PUBLIC)
     PHP_ME(ycdb, initialize, arginfo_ycdatabase_void, ZEND_ACC_PUBLIC)
+    PHP_ME(ycdb, begin, arginfo_ycdatabase_void, ZEND_ACC_PUBLIC)
+    PHP_ME(ycdb, commit, arginfo_ycdatabase_void, ZEND_ACC_PUBLIC)
+    PHP_ME(ycdb, rollback, arginfo_ycdatabase_void, ZEND_ACC_PUBLIC)
     NULL, NULL, NULL
 };
 
@@ -84,7 +87,7 @@ void ycdb_init() {
     zend_declare_property_null(ycdb_ce_ptr, ZEND_STRL("option"), ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(ycdb_ce_ptr, ZEND_STRL("errcode"),ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(ycdb_ce_ptr, ZEND_STRL("errinfo"), ZEND_ACC_PUBLIC TSRMLS_CC);
-    zend_declare_property_null(ycdb_ce_ptr, ZEND_STRL("_pdo"), ZEND_ACC_PROTECTED TSRMLS_CC);
+    zend_declare_property_null(ycdb_ce_ptr, ZEND_STRL("_pdo"), ZEND_ACC_PUBLIC TSRMLS_CC);
 }
 
 //ycdb构造函数
@@ -219,6 +222,55 @@ PHP_METHOD(ycdb, initialize) {
     }
 
     RETURN_TRUE;
+}
+
+//事务开始
+PHP_METHOD(ycdb, begin) {
+    zval* thisObject = getThis();
+
+    zval* pdo = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo") TSRMLS_CC);
+    if (YC_IS_NULL(pdo)) {
+        RETURN_MY_ERROR("pdo is empty");
+    }
+
+    if (yc_call_user_function_return_bool_or_unsigned(&pdo, "beginTransaction", 0, NULL) == 1) {
+        RETURN_TRUE;
+    }
+    
+    RETURN_FALSE;
+}
+
+//事务提交
+PHP_METHOD(ycdb, commit) {
+    zval* thisObject = getThis();
+
+    zval* pdo = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo") TSRMLS_CC);
+    if (YC_IS_NULL(pdo)) {
+        RETURN_MY_ERROR("pdo is empty");
+    }
+
+    if (yc_call_user_function_return_bool_or_unsigned(&pdo, "commit", 0, NULL) == 1) {
+        RETURN_TRUE;
+    }
+    
+    RETURN_FALSE;
+}
+
+
+//事务回滚
+PHP_METHOD(ycdb, rollback) {
+    zval* thisObject = getThis();
+
+    zval* pdo = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo") TSRMLS_CC);
+    if (YC_IS_NULL(pdo)) {
+        RETURN_MY_ERROR("pdo is empty");
+    }
+    
+    if (yc_call_user_function_return_bool_or_unsigned(&pdo, "rollBack", 0, NULL) == 1) {
+        RETURN_TRUE;
+    }
+    
+    RETURN_FALSE;
 }
 
 //执行查询
