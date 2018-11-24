@@ -15,6 +15,7 @@
   - Update statement
   - Delete statement
   - Whole Example
+  - 
   
 ## Instruction
   ycdb is an mysql database orm written in c, built in php extension, as we known, database ORM is a very time-consuming operation, especially for interpretive languages such as PHP, and for a project, the proportion of ORM is very high,so here I will implement the MySQL ORM operation in C language, and use the performance of C language to improve the performance of ORM, and ycdb can solve SQL injection through parameter binding. <br><br>
@@ -589,3 +590,19 @@ $where =  [
 
 $ycdb->select($table, $join, $columns, $where);
 ```
+
+- Database transaction
+
+```php
+$ycdb->begin();
+
+$ret1 = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) values('smallhow', 'male', 29, 180)");
+$ret2 = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) values('jesson', 'female', 28, 175)");
+
+if($ret1 == -1 || $ret2 == -1 ) {
+  $ycdb->rollback();
+} else {
+  $ycdb->commit()
+}
+```
+
