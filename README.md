@@ -16,7 +16,7 @@
   - Delete statement
   - Whole Example
   - Database Transaction
-  - Data Cache
+  - Data Caching
   
 ## Instruction
   ycdb is an mysql database orm written in c, built in php extension, as we known, database ORM is a very time-consuming operation, especially for interpretive languages such as PHP, and for a project, the proportion of ORM is very high,so here I will implement the MySQL ORM operation in C language, and use the performance of C language to improve the performance of ORM, and ycdb can solve SQL injection through parameter binding. Moreover, ycdb supports data caching. You can use redis as a medium to cache database data, but remember that when the update, insert, and delete operations involve caching data, you need to delete your cache to ensure data consistency.<br><br>
@@ -607,3 +607,35 @@ if($ret1 == -1 || $ret2 == -1 ) {
 }
 ```
 
+## Data Caching
+
+We can use redis, or any other cache system that supports set/get/del/expire function as the medium to store the data returned by the database. If you do not specify the expiration time, the default storage expiration time is 5 minutes. if The cache is specified. When we call data update function such as update/delete/insert, we should pass in the same cache key so that ycdb can clear the cache.<br><br>
+
+_我们可以以 redis,或者其他任何支持 set/get/del/expire 这4种方法的缓存系统作为介质，存储 database 返回的数据，如果不指定到期时间，默认存储到期时间为5分钟，当我们指定了缓存，如果对数据有update/delete/insert等更新操作，我们最好是传入相同的缓存key，以便ycdb能够清理缓存_
+```php
+//we 
+$redis = new Redis();
+$redis->connect('/home/redis/pid/redis.sock');
+
+$option = array("host" => "47.106.114.151", 
+                "username" => "root", 
+                "password" => "cao123123", 
+                "dbname" => "dabaojian", 
+                "port" => '3306',
+                "cache" => $redis,  //cache instance
+                'option' => array(
+                    PDO::ATTR_CASE => PDO::CASE_NATURAL,
+                    PDO::ATTR_TIMEOUT => 2));
+
+
+$ycdb = new ycdb($option);
+
+try{
+  $ycdb->initialize();
+} catch (PDOException $e) {
+  echo "find PDOException when initialize\n";
+  exit;
+}
+
+
+```
