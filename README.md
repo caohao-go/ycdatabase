@@ -613,6 +613,7 @@ We can use redis, or any other cache system that supports set/get/del/expire fun
 
 _我们可以以 redis,或者其他任何支持 set/get/del/expire 这4种方法的缓存系统作为介质，存储 database 返回的数据，如果不指定到期时间，默认存储到期时间为5分钟，当我们指定了缓存，如果对数据有update/delete/insert等更新操作，我们最好是传入相同的缓存key，以便ycdb能够清理缓存来保持数据的一致性_
 ```php
+//we want cache data by redis
 $redis = new Redis();
 $redis->connect('/home/redis/pid/redis.sock');
 
