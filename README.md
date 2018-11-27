@@ -423,13 +423,16 @@ $data = $ycdb->select("user_info_test(uinfo)", [
 ## Insert statement
 
 ```php
-insert($table, $data)
+insert($table, $data, $cache_info)
 ```
 #### table [string]
 > table name
 
 #### data [array]
 > insert data
+
+#### cache_info (optional) [array]
+> cache info
 
 #### return [int]
 >Fail if -1 is returned, otherwise the number of inserted records is returned<br>
