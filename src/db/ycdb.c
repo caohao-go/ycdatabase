@@ -37,6 +37,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ycdb_insert_oo, 0, 0, 2)
 ZEND_ARG_INFO(0, table)
 ZEND_ARG_ARRAY_INFO(0, data, 0)
+ZEND_ARG_ARRAY_INFO(0, cache_info, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ycdb_update_oo, 0, 0, 2)
@@ -88,6 +89,7 @@ void ycdb_init() {
     zend_declare_property_null(ycdb_ce_ptr, ZEND_STRL("errcode"),ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(ycdb_ce_ptr, ZEND_STRL("errinfo"), ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(ycdb_ce_ptr, ZEND_STRL("_pdo"), ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(ycdb_ce_ptr, ZEND_STRL("cache"), ZEND_ACC_PUBLIC TSRMLS_CC);
 }
 
 //ycdb构造函数
@@ -136,6 +138,10 @@ PHP_METHOD(ycdb, __construct) {
         zend_update_property_string(ycdb_ce_ptr, thisObject, ZEND_STRL("charset"), Z_STRVAL_P(v) TSRMLS_DC);
     }
 
+    if ((v = php_yc_array_get_value(vht, "cache")) != NULL) {
+        zend_update_property(ycdb_ce_ptr, thisObject, ZEND_STRL("cache"), v TSRMLS_DC);
+    }
+
     if ((v = php_yc_array_get_value(vht, "option")) != NULL) {
         zend_update_property(ycdb_ce_ptr, thisObject, ZEND_STRL("option"), v TSRMLS_DC);
     }
@@ -159,7 +165,7 @@ PHP_METHOD(ycdb, errorInfo) {
 PHP_METHOD(ycdb, initialize) {
     zval* thisObject = getThis();
     zval* pdo = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo") TSRMLS_CC);
-	
+
     if (YC_IS_NULL(pdo)) {
         zval *dsn;
         zval **args[4];
@@ -193,7 +199,7 @@ PHP_METHOD(ycdb, initialize) {
             yc_zval_ptr_dtor(&dsn);
             RETURN_FALSE;
         }
-        
+
         yc_zval_ptr_dtor(&dsn);
 
         zend_update_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo"), pdo TSRMLS_CC);
@@ -204,9 +210,9 @@ PHP_METHOD(ycdb, initialize) {
 
         yc_sprint_stack_string_128(charset_sql, "SET NAMES %s", Z_STRVAL_P(charset));
         exec_args[0] = &charset_sql;
-        
+
         int setret = yc_call_user_function_return_bool_or_unsigned(&pdo, "exec", 1, exec_args);
-        
+
         if (setret == FAILURE) {
             yc_zval_ptr_dtor(&charset_sql);
             yc_php_fatal_error(E_WARNING, "failed to set database charset.");
@@ -217,7 +223,7 @@ PHP_METHOD(ycdb, initialize) {
             yc_zval_ptr_dtor(&charset_sql);
             RETURN_FALSE;
         }
-        
+
         yc_zval_ptr_dtor(&charset_sql);
     }
 
@@ -236,7 +242,7 @@ PHP_METHOD(ycdb, begin) {
     if (yc_call_user_function_return_bool_or_unsigned(&pdo, "beginTransaction", 0, NULL) == 1) {
         RETURN_TRUE;
     }
-    
+
     RETURN_FALSE;
 }
 
@@ -252,7 +258,7 @@ PHP_METHOD(ycdb, commit) {
     if (yc_call_user_function_return_bool_or_unsigned(&pdo, "commit", 0, NULL) == 1) {
         RETURN_TRUE;
     }
-    
+
     RETURN_FALSE;
 }
 
@@ -265,11 +271,11 @@ PHP_METHOD(ycdb, rollback) {
     if (YC_IS_NULL(pdo)) {
         RETURN_MY_ERROR("pdo is empty");
     }
-    
+
     if (yc_call_user_function_return_bool_or_unsigned(&pdo, "rollBack", 0, NULL) == 1) {
         RETURN_TRUE;
     }
-    
+
     RETURN_FALSE;
 }
 
@@ -285,10 +291,10 @@ PHP_METHOD(ycdb, exec) {
     if (Z_TYPE_P(query) != IS_STRING) {
         RETURN_MY_ERROR("Argument 1 passed must be of the type string");
     }
-	
-	//初始化错误
-	update_error_info(thisObject, "00000", "");
-	
+
+    //初始化错误
+    update_error_info(thisObject, "00000", "");
+
     //判断是否数据库 WRITE 写操作，或者 SELECT 查询
     int is_write = is_write_type(Z_STRVAL_P(query));
 
@@ -296,24 +302,24 @@ PHP_METHOD(ycdb, exec) {
     if (YC_IS_NULL(pdo)) {
         RETURN_MY_ERROR("pdo is empty");
     }
-	
+
     //prepare query
     zval** prepare_args[1];
     zval* statement = NULL;
-    
+
     prepare_args[0] = &query;
-	
+
     if (yc_call_user_function_ex_fast(&pdo, "prepare", &statement, 1, prepare_args) == FAILURE) {
-		yc_zval_free(statement);
-		yc_php_fatal_error(E_ERROR, "failed to prepare query");
-		RETURN_LONG(-1);
+        yc_zval_free(statement);
+        yc_php_fatal_error(E_ERROR, "failed to prepare query");
+        RETURN_LONG(-1);
     }
-	
+
     if (EG(exception) || YC_IS_NULL(statement)) {
-    	yc_zval_free(statement);
+        yc_zval_free(statement);
         RETURN_MY_ERROR("failed to prepare query, pdo is not initialized");
     }
-    
+
     //bind value
     if (YC_IS_NOT_NULL(map) && Z_TYPE_P(map) == IS_ARRAY) {
         char * key;
@@ -325,7 +331,7 @@ PHP_METHOD(ycdb, exec) {
         if (HASH_KEY_IS_STRING != key_type) {
             continue;
         }
-        
+
         zval** bind_args[3];
         zval *bind_key = NULL, *bind_type = NULL;
 
@@ -359,7 +365,7 @@ PHP_METHOD(ycdb, exec) {
             //if (is_numeric_string(Z_STRVAL_P(value), Z_STRLEN_P(value), NULL, NULL, 0)) { //当varchar类型的数字 where update为字符串的时候，数据库报错。
             //    ZVAL_LONG(bind_type, PDO_PARAM_INT);
             //} else {
-                ZVAL_LONG(bind_type, PDO_PARAM_STR);
+            ZVAL_LONG(bind_type, PDO_PARAM_STR);
             //}
             break;
         default:
@@ -367,32 +373,32 @@ PHP_METHOD(ycdb, exec) {
         }
 
         bind_args[2] = &bind_type;
-        
-		int ret = yc_call_user_function_return_bool_or_unsigned(&statement, "bindValue", 3, bind_args);
-		yc_zval_ptr_dtor(&bind_key);
+
+        int ret = yc_call_user_function_return_bool_or_unsigned(&statement, "bindValue", 3, bind_args);
+        yc_zval_ptr_dtor(&bind_key);
         yc_zval_ptr_dtor(&bind_type);
-		
+
         if (ret == FAILURE) {
             yc_zval_free(statement);
             yc_php_fatal_error(E_ERROR, "failed to bind value");
             RETURN_LONG(-1);
         }
-        
+
         YC_HASHTABLE_FOREACH_END();
     }
-    
+
     //execute
     if (yc_call_user_function_return_bool_or_unsigned(&statement, "execute", 0, NULL) == FAILURE) {
-    	yc_zval_free(statement);
+        yc_zval_free(statement);
         yc_php_fatal_error(E_ERROR, "failed to execute sql");
         RETURN_LONG(-1);
     }
 
     if (EG(exception)) {
-    	yc_zval_free(statement);
+        yc_zval_free(statement);
         RETURN_MY_ERROR("[exception] failed to execute sql");
     }
-			
+
     //获取查询 error 信息
     zval* errorCode = NULL;
     zval* errorInfo = NULL;
@@ -401,9 +407,9 @@ PHP_METHOD(ycdb, exec) {
     yc_call_user_function_ex_fast(&statement, "errorInfo", &errorInfo, 0, NULL);
 
     update_pdo_error(thisObject, errorCode, errorInfo);
-    
+
     if (YC_IS_NULL(errorCode) || strcmp(Z_STRVAL_P(errorCode), "00000") != 0) {
-    	yc_zval_free(statement);
+        yc_zval_free(statement);
         yc_zval_free(errorCode);
         yc_zval_free(errorInfo);
         RETURN_LONG(-1);
@@ -411,7 +417,7 @@ PHP_METHOD(ycdb, exec) {
 
     yc_zval_free(errorCode);
     yc_zval_free(errorInfo);
-    
+
     if (is_write) {
         int row_count = yc_call_user_function_return_bool_or_unsigned(&statement, "rowCount", 0, NULL);
         yc_zval_free(statement);
@@ -434,181 +440,187 @@ PHP_METHOD(ycdb, query) {
     if (Z_TYPE_P(z_sql) != IS_STRING) {
         RETURN_MY_ERROR("Argument 1 passed must be of the type string");
     }
-	
+
     //执行SQL
-	zval *statement = NULL;
-	zval **exec_args[1];
-	exec_args[0] = &z_sql;
-    
-	if (yc_call_user_function_ex_fast(&thisObject, "exec", &statement, 1, exec_args) == FAILURE) {
-    	yc_zval_ptr_dtor(&z_sql);
-    	yc_zval_free(statement);
-		RETURN_LONG(-1);
+    zval *statement = NULL;
+    zval **exec_args[1];
+    exec_args[0] = &z_sql;
+
+    if (yc_call_user_function_ex_fast(&thisObject, "exec", &statement, 1, exec_args) == FAILURE) {
+        yc_zval_ptr_dtor(&z_sql);
+        yc_zval_free(statement);
+        RETURN_LONG(-1);
     }
-    
+
     yc_zval_ptr_dtor(&z_sql);
-    
-    if(YC_IS_NOT_NULL(statement) && Z_TYPE_P(statement) == IS_OBJECT) { //获取结果
+
+    if (YC_IS_NOT_NULL(statement) && Z_TYPE_P(statement) == IS_OBJECT) { //获取结果
         zval **fetch_args[1];
         zval *result = NULL, *fetch_type = NULL;
-        
+
         YC_MAKE_STD_ZVAL(fetch_type);
-    	ZVAL_LONG(fetch_type, PDO_FETCH_ASSOC);
-    	
-    	fetch_args[0] = &fetch_type;
-    	
-    	if (yc_call_user_function_ex_fast(&statement, "fetchAll", &result, 1, fetch_args) == FAILURE) {
-	    	yc_zval_free(statement);
-	    	yc_zval_free(result);
-	    	yc_zval_ptr_dtor(&fetch_type);
-			RETURN_LONG(-1);
-	    }
-	    
-	    yc_zval_free(statement);
-	    yc_zval_ptr_dtor(&fetch_type);
-	    
-		RETVAL_ZVAL(result, 1, 1);
-    	efree(result);
+        ZVAL_LONG(fetch_type, PDO_FETCH_ASSOC);
+
+        fetch_args[0] = &fetch_type;
+
+        if (yc_call_user_function_ex_fast(&statement, "fetchAll", &result, 1, fetch_args) == FAILURE) {
+            yc_zval_free(statement);
+            yc_zval_free(result);
+            yc_zval_ptr_dtor(&fetch_type);
+            RETURN_LONG(-1);
+        }
+
+        yc_zval_free(statement);
+        yc_zval_ptr_dtor(&fetch_type);
+
+        RETVAL_ZVAL(result, 1, 1);
+        efree(result);
     } else {
-    	yc_zval_free(statement);
-		RETURN_LONG(-1);
+        yc_zval_free(statement);
+        RETURN_LONG(-1);
     }
 }
 
 PHP_METHOD(ycdb, insert_id) {
-	zval *thisObject = getThis();
-	
-	//初始化错误
-	update_error_info(thisObject, "00000", "");
-	
-	zval* pdo = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo") TSRMLS_CC);
+    zval *thisObject = getThis();
+
+    //初始化错误
+    update_error_info(thisObject, "00000", "");
+
+    zval* pdo = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo") TSRMLS_CC);
     if (YC_IS_NULL(pdo)) {
         RETURN_MY_ERROR("pdo is empty");
     }
-    
+
     //exec
     zval* insertid = NULL;
     if (yc_call_user_function_ex_fast(&pdo, "lastInsertId", &insertid, 0, NULL) == FAILURE) {
-		yc_zval_free(insertid);
-		yc_php_fatal_error(E_ERROR, "failed to get lastInsertId");
-		RETURN_LONG(-1);
+        yc_zval_free(insertid);
+        yc_php_fatal_error(E_ERROR, "failed to get lastInsertId");
+        RETURN_LONG(-1);
     }
-	
+
     if (EG(exception) || YC_IS_NULL(insertid)) {
-    	yc_zval_free(insertid);
+        yc_zval_free(insertid);
         RETURN_MY_ERROR("failed to get lastInsertId, pdo is not initialized");
     }
-    
-	RETVAL_ZVAL(insertid, 1, 1);
+
+    RETVAL_ZVAL(insertid, 1, 1);
     efree(insertid);
 }
 
 //insert 插入
 PHP_METHOD(ycdb, insert) {
-	char *table = NULL;
-	zval *thisObject = getThis();
-	zend_size_t table_len;
-	zval *data = NULL;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &table, &table_len, &data) == FAILURE) {
+    char *table = NULL;
+    zval *thisObject = getThis();
+    zend_size_t table_len;
+    zval *data = NULL, *cache_info = NULL;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|z", &table, &table_len, &data, &cache_info) == FAILURE) {
         RETURN_LONG(-1);
     }
 	
+	//删除缓存
+    if(YC_IS_NOT_NULL(cache_info) && YC_IS_ARRAY(cache_info)) {
+        zval* cache_obj = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("cache") TSRMLS_CC);
+        del_cache(cache_obj, cache_info);
+    }
+    
     //解析data数据
-	char *insert_sql, *insert_keys,*insert_value;
-	char *key;
+    char *insert_sql, *insert_keys,*insert_value;
+    char *key;
     zval *value;
     uint32_t key_len;
     int key_type;
-	char longval[MAP_ITOA_INT_SIZE], doubleval[32];
-    
-	yc_string_emalloc_32(&insert_sql, 0);
-	yc_string_emalloc_32(&insert_keys, 0);
-	yc_string_emalloc_32(&insert_value, 0);
+    char longval[MAP_ITOA_INT_SIZE], doubleval[32];
 
-	YC_HASHTABLE_FOREACH_START2(Z_ARRVAL_P(data), key, key_len, key_type, value)
-        if (HASH_KEY_IS_STRING != key_type) {
-            yc_string_efree_32(insert_keys);
-            yc_string_efree_32(insert_value);
-            yc_string_efree_32(insert_sql);
-            RETURN_MY_ERROR("input data must be key/value hash, not index array.");
-        } else {
-        	yc_multi_memcpy_auto_realloc(&insert_keys, 3, "`", key, "`,");
-        	
-        	switch(Z_TYPE_P(value)) {
-        		case IS_NULL:
-        			yc_multi_memcpy_auto_realloc(&insert_value, 1, "NULL,");
-        			break;
-        		case IS_ARRAY:
-        			yc_multi_memcpy_auto_realloc(&insert_value, 1, "ARRAY,");
-        			break;
-#if PHP_MAJOR_VERSION < 7 /* PHP Version 5 */
-                case IS_BOOL:
-                	if(Z_BVAL_P(value)) {
-                		yc_multi_memcpy_auto_realloc(&insert_value, 1, "1,");
-                	} else {
-                		yc_multi_memcpy_auto_realloc(&insert_value, 1, "0,");
-                	}
-                	break;
-#else /* PHP Version 7 */
-                case IS_TRUE:
-                	yc_multi_memcpy_auto_realloc(&insert_value, 1, "1,");
-                	break;
-                case IS_FALSE:
-                	yc_multi_memcpy_auto_realloc(&insert_value, 1, "0,");
-                	break;
-#endif
-				case IS_LONG:
-					yc_itoa(Z_LVAL_P(value), longval);
-					yc_multi_memcpy_auto_realloc(&insert_value, 2, longval, ",");
-					break;
-					
-				case IS_DOUBLE:
-					sprintf(doubleval, "%g", Z_DVAL_P(value));
-					yc_multi_memcpy_auto_realloc(&insert_value, 2, doubleval, ",");
-					break;
-				case IS_STRING:
-					yc_multi_memcpy_auto_realloc(&insert_value, 3, "'", Z_STRVAL_P(value), "',");
-					break;
-        	}
-        	
-        }
-   YC_HASHTABLE_FOREACH_END();
-   		
-		rtrim_str(insert_keys, ",");
-		rtrim_str(insert_value, ",");
-   		yc_multi_memcpy_auto_realloc(&insert_sql, 7, "INSERT INTO `", table, "` (", insert_keys ,") values (", insert_value, ")");
+    yc_string_emalloc_32(&insert_sql, 0);
+    yc_string_emalloc_32(&insert_keys, 0);
+    yc_string_emalloc_32(&insert_value, 0);
+
+    YC_HASHTABLE_FOREACH_START2(Z_ARRVAL_P(data), key, key_len, key_type, value)
+    if (HASH_KEY_IS_STRING != key_type) {
         yc_string_efree_32(insert_keys);
         yc_string_efree_32(insert_value);
+        yc_string_efree_32(insert_sql);
+        RETURN_MY_ERROR("input data must be key/value hash, not index array.");
+    } else {
+        yc_multi_memcpy_auto_realloc(&insert_keys, 3, "`", key, "`,");
 
-		//执行SQL
-		zval *result = NULL, *z_sql = NULL;
-		zval **exec_args[1];
+        switch (Z_TYPE_P(value)) {
+        case IS_NULL:
+            yc_multi_memcpy_auto_realloc(&insert_value, 1, "NULL,");
+            break;
+        case IS_ARRAY:
+            yc_multi_memcpy_auto_realloc(&insert_value, 1, "ARRAY,");
+            break;
+#if PHP_MAJOR_VERSION < 7 /* PHP Version 5 */
+        case IS_BOOL:
+            if (Z_BVAL_P(value)) {
+                yc_multi_memcpy_auto_realloc(&insert_value, 1, "1,");
+            } else {
+                yc_multi_memcpy_auto_realloc(&insert_value, 1, "0,");
+            }
+            break;
+#else /* PHP Version 7 */
+        case IS_TRUE:
+            yc_multi_memcpy_auto_realloc(&insert_value, 1, "1,");
+            break;
+        case IS_FALSE:
+            yc_multi_memcpy_auto_realloc(&insert_value, 1, "0,");
+            break;
+#endif
+        case IS_LONG:
+            yc_itoa(Z_LVAL_P(value), longval);
+            yc_multi_memcpy_auto_realloc(&insert_value, 2, longval, ",");
+            break;
 
-		YC_MAKE_STD_ZVAL(z_sql);
-		YC_ZVAL_STRING(z_sql, insert_sql, 1);
-		yc_string_efree_32(insert_sql);
-		exec_args[0] = &z_sql;
-		
-		if (yc_call_user_function_ex_fast(&thisObject, "exec", &result, 1, exec_args) == FAILURE) {
-	    	yc_zval_ptr_dtor(&z_sql);
-	    	yc_zval_free(result);
-			RETURN_LONG(-1);
-	    }
-		
-	    yc_zval_ptr_dtor(&z_sql);
-		RETVAL_ZVAL(result, 1, 1);
-    	efree(result);
+        case IS_DOUBLE:
+            sprintf(doubleval, "%g", Z_DVAL_P(value));
+            yc_multi_memcpy_auto_realloc(&insert_value, 2, doubleval, ",");
+            break;
+        case IS_STRING:
+            yc_multi_memcpy_auto_realloc(&insert_value, 3, "'", Z_STRVAL_P(value), "',");
+            break;
+        }
+
+    }
+    YC_HASHTABLE_FOREACH_END();
+
+    rtrim_str(insert_keys, ",");
+    rtrim_str(insert_value, ",");
+    yc_multi_memcpy_auto_realloc(&insert_sql, 7, "INSERT INTO `", table, "` (", insert_keys ,") values (", insert_value, ")");
+    yc_string_efree_32(insert_keys);
+    yc_string_efree_32(insert_value);
+
+    //执行SQL
+    zval *result = NULL, *z_sql = NULL;
+    zval **exec_args[1];
+
+    YC_MAKE_STD_ZVAL(z_sql);
+    YC_ZVAL_STRING(z_sql, insert_sql, 1);
+    yc_string_efree_32(insert_sql);
+    exec_args[0] = &z_sql;
+
+    if (yc_call_user_function_ex_fast(&thisObject, "exec", &result, 1, exec_args) == FAILURE) {
+        yc_zval_ptr_dtor(&z_sql);
+        yc_zval_free(result);
+        RETURN_LONG(-1);
+    }
+
+    yc_zval_ptr_dtor(&z_sql);
+    RETVAL_ZVAL(result, 1, 1);
+    efree(result);
 }
 
 //update 更新
 PHP_METHOD(ycdb, update) {
     char *table = NULL;
-	zval *thisObject = getThis();
-	zend_size_t table_len;
-	zval *data = NULL, *where = NULL;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|z", &table, &table_len, &data, &where) == FAILURE) {
+    zval *thisObject = getThis();
+    zend_size_t table_len;
+    zval *data = NULL, *where = NULL;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|z", &table, &table_len, &data, &where) == FAILURE) {
         RETURN_LONG(-1);
     }
 
@@ -617,94 +629,100 @@ PHP_METHOD(ycdb, update) {
     yc_string_emalloc_32(&update_sql, 0);
 
     char *update_datas;
-	char *key;
+    char *key;
     zval *value;
     uint32_t key_len;
     int key_type;
-	char longval[MAP_ITOA_INT_SIZE], doubleval[32];
-    
-	yc_string_emalloc_32(&update_datas, 0);
+    char longval[MAP_ITOA_INT_SIZE], doubleval[32];
 
-	YC_HASHTABLE_FOREACH_START2(Z_ARRVAL_P(data), key, key_len, key_type, value)
-        if (HASH_KEY_IS_STRING != key_type) {
-            yc_string_efree_32(update_datas);
-            yc_string_efree_32(update_sql);
-            RETURN_MY_ERROR("input data must be key/value hash, not index array.");
-        } else {
-        	yc_multi_memcpy_auto_realloc(&update_datas, 3, "`", key, "` = ");
-        	
-        	switch(Z_TYPE_P(value)) {
-        		case IS_NULL:
-        			yc_multi_memcpy_auto_realloc(&update_datas, 1, "NULL,");
-        			break;
-        		case IS_ARRAY:
-        			yc_multi_memcpy_auto_realloc(&update_datas, 1, "ARRAY,");
-        			break;
+    yc_string_emalloc_32(&update_datas, 0);
+
+    YC_HASHTABLE_FOREACH_START2(Z_ARRVAL_P(data), key, key_len, key_type, value)
+    if (HASH_KEY_IS_STRING != key_type) {
+        yc_string_efree_32(update_datas);
+        yc_string_efree_32(update_sql);
+        RETURN_MY_ERROR("input data must be key/value hash, not index array.");
+    } else {
+        yc_multi_memcpy_auto_realloc(&update_datas, 3, "`", key, "` = ");
+
+        switch (Z_TYPE_P(value)) {
+        case IS_NULL:
+            yc_multi_memcpy_auto_realloc(&update_datas, 1, "NULL,");
+            break;
+        case IS_ARRAY:
+            yc_multi_memcpy_auto_realloc(&update_datas, 1, "ARRAY,");
+            break;
 #if PHP_MAJOR_VERSION < 7 /* PHP Version 5 */
-                case IS_BOOL:
-                	if(Z_BVAL_P(value)) {
-                		yc_multi_memcpy_auto_realloc(&update_datas, 1, "1,");
-                	} else {
-                		yc_multi_memcpy_auto_realloc(&update_datas, 1, "0,");
-                	}
-                	break;
+        case IS_BOOL:
+            if (Z_BVAL_P(value)) {
+                yc_multi_memcpy_auto_realloc(&update_datas, 1, "1,");
+            } else {
+                yc_multi_memcpy_auto_realloc(&update_datas, 1, "0,");
+            }
+            break;
 #else /* PHP Version 7 */
-                case IS_TRUE:
-                	yc_multi_memcpy_auto_realloc(&update_datas, 1, "1,");
-                	break;
-                case IS_FALSE:
-                	yc_multi_memcpy_auto_realloc(&update_datas, 1, "0,");
-                	break;
+        case IS_TRUE:
+            yc_multi_memcpy_auto_realloc(&update_datas, 1, "1,");
+            break;
+        case IS_FALSE:
+            yc_multi_memcpy_auto_realloc(&update_datas, 1, "0,");
+            break;
 #endif
-				case IS_LONG:
-					yc_itoa(Z_LVAL_P(value), longval);
-					yc_multi_memcpy_auto_realloc(&update_datas, 2, longval, ",");
-					break;
-					
-				case IS_DOUBLE:
-					sprintf(doubleval, "%g", Z_DVAL_P(value));
-					yc_multi_memcpy_auto_realloc(&update_datas, 2, doubleval, ",");
-					break;
-				case IS_STRING:
-					yc_multi_memcpy_auto_realloc(&update_datas, 3, "'", Z_STRVAL_P(value), "',");
-					break;
-        	}
-        	
-        }
-   YC_HASHTABLE_FOREACH_END();
-   		
-	rtrim_str(update_datas, ",");
-   	yc_multi_memcpy_auto_realloc(&update_sql, 4, "UPDATE `", table, "` SET ", update_datas);
-    yc_string_efree_32(update_datas);
+        case IS_LONG:
+            yc_itoa(Z_LVAL_P(value), longval);
+            yc_multi_memcpy_auto_realloc(&update_datas, 2, longval, ",");
+            break;
 
+        case IS_DOUBLE:
+            sprintf(doubleval, "%g", Z_DVAL_P(value));
+            yc_multi_memcpy_auto_realloc(&update_datas, 2, doubleval, ",");
+            break;
+        case IS_STRING:
+            yc_multi_memcpy_auto_realloc(&update_datas, 3, "'", Z_STRVAL_P(value), "',");
+            break;
+        }
+
+    }
+    YC_HASHTABLE_FOREACH_END();
+
+    rtrim_str(update_datas, ",");
+    yc_multi_memcpy_auto_realloc(&update_sql, 4, "UPDATE `", table, "` SET ", update_datas);
+    yc_string_efree_32(update_datas);
+    
     //where条件
-    zval *map;
+    zval *map, *cache_info = NULL;
     YC_MAKE_STD_ZVAL(map);
     array_init(map);
-
-    where_clause(where, map, & update_sql);
+		
+    where_clause(where, map, & update_sql, &cache_info);
+    
+    //删除缓存
+    if(YC_IS_NOT_NULL(cache_info) && YC_IS_ARRAY(cache_info)) {
+        zval* cache_obj = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("cache") TSRMLS_CC);
+        del_cache(cache_obj, cache_info);
+    }
 
     //执行 SQL 语句
     zval *z_sql = NULL, *result = NULL;
-	zval **exec_args[2];
+    zval **exec_args[2];
 
-	YC_MAKE_STD_ZVAL(z_sql);
+    YC_MAKE_STD_ZVAL(z_sql);
     YC_ZVAL_STRING(z_sql, update_sql, 1);
-	yc_string_efree_32(update_sql);
-    
+    yc_string_efree_32(update_sql);
+
     exec_args[0] = &z_sql;
-	exec_args[1] = &map;
+    exec_args[1] = &map;
 
     if (yc_call_user_function_ex_fast(&thisObject, "exec", &result, 2, exec_args) == FAILURE) {
-    	yc_zval_ptr_dtor(&map);
-    	yc_zval_ptr_dtor(&z_sql);
-    	yc_zval_free(result);
-		RETURN_LONG(-1);
+        yc_zval_ptr_dtor(&map);
+        yc_zval_ptr_dtor(&z_sql);
+        yc_zval_free(result);
+        RETURN_LONG(-1);
     }
-    
+
     yc_zval_ptr_dtor(&map);
-	yc_zval_ptr_dtor(&z_sql);
-	RETVAL_ZVAL(result, 1, 1);
+    yc_zval_ptr_dtor(&z_sql);
+    RETVAL_ZVAL(result, 1, 1);
     efree(result);
 }
 
@@ -712,47 +730,56 @@ PHP_METHOD(ycdb, update) {
 //delete 删除
 PHP_METHOD(ycdb, delete) {
     char *table = NULL;
-	zval *thisObject = getThis();
-	zend_size_t table_len;
-	zval *where = NULL;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &table, &table_len, &where) == FAILURE) {
+    zval *thisObject = getThis();
+    zend_size_t table_len;
+    zval *where = NULL;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &table, &table_len, &where) == FAILURE) {
         RETURN_LONG(-1);
     }
 
     //更新语句
     char *delete_sql;
     yc_string_emalloc_32(&delete_sql, 0);
-   	yc_multi_memcpy_auto_realloc(&delete_sql, 3, "DELETE FROM `", table, "` ");
+    yc_multi_memcpy_auto_realloc(&delete_sql, 3, "DELETE FROM `", table, "` ");
 
+	//cache 缓存
+	zval *cache_info = NULL;
+	
     //where条件
     zval *map;
     YC_MAKE_STD_ZVAL(map);
     array_init(map);
 
-    where_clause(where, map, & delete_sql);
+    where_clause(where, map, & delete_sql, &cache_info);
+    
+    //删除缓存
+    if(YC_IS_NOT_NULL(cache_info) && YC_IS_ARRAY(cache_info)) {
+        zval* cache_obj = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("cache") TSRMLS_CC);
+        del_cache(cache_obj, cache_info);
+    }
 
     //执行 SQL 语句
     zval *z_sql = NULL, *result = NULL;
-	zval **exec_args[2];
+    zval **exec_args[2];
 
-	YC_MAKE_STD_ZVAL(z_sql);
+    YC_MAKE_STD_ZVAL(z_sql);
     YC_ZVAL_STRING(z_sql, delete_sql, 1);
-	yc_string_efree_32(delete_sql);
-    
+    yc_string_efree_32(delete_sql);
+
     exec_args[0] = &z_sql;
-	exec_args[1] = &map;
+    exec_args[1] = &map;
 
     if (yc_call_user_function_ex_fast(&thisObject, "exec", &result, 2, exec_args) == FAILURE) {
-    	yc_zval_ptr_dtor(&map);
-    	yc_zval_ptr_dtor(&z_sql);
-    	yc_zval_free(result);
-		RETURN_LONG(-1);
+        yc_zval_ptr_dtor(&map);
+        yc_zval_ptr_dtor(&z_sql);
+        yc_zval_free(result);
+        RETURN_LONG(-1);
     }
-    
+
     yc_zval_ptr_dtor(&map);
-	yc_zval_ptr_dtor(&z_sql);
-	RETVAL_ZVAL(result, 1, 1);
+    yc_zval_ptr_dtor(&z_sql);
+    RETVAL_ZVAL(result, 1, 1);
     efree(result);
 }
 
@@ -766,77 +793,171 @@ PHP_METHOD(ycdb, select) {
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|zz", &table, &table_len, &join, &columns, &where) == FAILURE) {
         RETURN_LONG(-1);
     }
-	
+
     //是否查询单个列，当 where 为空的时候， 判断 join 是不是 "*"，否则判断 columns 是不是 "*"
     int is_single_column = 0;
     if ((YC_IS_NULL(where) && Z_TYPE_P(join) == IS_STRING && strcmp(Z_STRVAL_P(join), "*") != 0 && yc_strpos(Z_STRVAL_P(join), ",") < 0)
-      ||(YC_IS_NOT_NULL(where) && Z_TYPE_P(columns) == IS_STRING && strcmp(Z_STRVAL_P(columns), "*") != 0) && yc_strpos(Z_STRVAL_P(join), ",") < 0) {
+            ||(YC_IS_NOT_NULL(where) && Z_TYPE_P(columns) == IS_STRING && strcmp(Z_STRVAL_P(columns), "*") != 0) && yc_strpos(Z_STRVAL_P(join), ",") < 0) {
         is_single_column = 1;
     }
 
-	//查询语句初始化
+    //查询语句初始化
     char *sql;
-    zval *map, *z_sql = NULL;
+    zval *map;
+    zval *cache_info = NULL, *cache_obj = NULL, *cache_key = NULL;
     
     YC_MAKE_STD_ZVAL(map);
-	YC_MAKE_STD_ZVAL(z_sql);
     array_init(map);
     yc_string_emalloc_32(&sql, 0);
     
-    select_context(table, map, join, columns, where, &sql);
+    select_context(table, map, join, columns, where, &sql, &cache_info);
     
-	YC_ZVAL_STRING(z_sql, sql, 1);
-	yc_string_efree_32(sql);
-	
-    //执行SQL
-	zval *statement = NULL;
-	zval **exec_args[2];
-    
-	exec_args[0] = &z_sql;
-	exec_args[1] = &map;
-    
-	if (yc_call_user_function_ex_fast(&thisObject, "exec", &statement, 2, exec_args) == FAILURE) {
-    	yc_zval_ptr_dtor(&map);
-    	yc_zval_ptr_dtor(&z_sql);
-    	yc_zval_free(statement);
-		RETURN_LONG(-1);
+    //缓存获取数据
+    if(YC_IS_NOT_NULL(cache_info) && YC_IS_ARRAY(cache_info)) {
+        cache_obj = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("cache") TSRMLS_CC);
+        if (YC_IS_NOT_NULL(cache_obj)) {
+            cache_key = php_yc_array_get_value(Z_ARRVAL_P(cache_info), "key");
+            if(YC_IS_NOT_NULL(cache_key)) {
+                zval* cache_ret = get_cache(cache_obj, cache_key);
+                
+                if(cache_ret != NULL) {
+                    RETVAL_ZVAL(cache_ret, 1, 1);
+                    efree(cache_ret);
+                    yc_string_efree_32(sql);
+                    yc_zval_ptr_dtor(&map);
+                    return;
+                }
+            }
+        }
     }
     
+    //执行SQL
+    zval *z_sql = NULL, *statement = NULL;
+    zval **exec_args[2];
+    
+    YC_MAKE_STD_ZVAL(z_sql);
+    YC_ZVAL_STRING(z_sql, sql, 1);
+    yc_string_efree_32(sql);
+
+    exec_args[0] = &z_sql;
+    exec_args[1] = &map;
+
+    if (yc_call_user_function_ex_fast(&thisObject, "exec", &statement, 2, exec_args) == FAILURE) {
+        yc_zval_ptr_dtor(&map);
+        yc_zval_ptr_dtor(&z_sql);
+        yc_zval_free(statement);
+        RETURN_LONG(-1);
+    }
+
     yc_zval_ptr_dtor(&map);
     yc_zval_ptr_dtor(&z_sql);
-    
-    if(YC_IS_NOT_NULL(statement) && Z_TYPE_P(statement) == IS_OBJECT) { //获取结果
+
+    if (YC_IS_NOT_NULL(statement) && Z_TYPE_P(statement) == IS_OBJECT) { //获取结果
         zval **fetch_args[1];
         zval *result = NULL, *fetch_type = NULL;
-        
+
         YC_MAKE_STD_ZVAL(fetch_type);
-    	if (is_single_column == 1) {
-    		ZVAL_LONG(fetch_type, PDO_FETCH_COLUMN);
-    	} else {
-    		ZVAL_LONG(fetch_type, PDO_FETCH_ASSOC);
-    	}
-    	
-    	fetch_args[0] = &fetch_type;
-    	
-    	if (yc_call_user_function_ex_fast(&statement, "fetchAll", &result, 1, fetch_args) == FAILURE) {
-	    	yc_zval_free(statement);
-	    	yc_zval_free(result);
-	    	yc_zval_ptr_dtor(&fetch_type);
-			RETURN_LONG(-1);
-	    }
-	    
-	    yc_zval_free(statement);
-	    yc_zval_ptr_dtor(&fetch_type);
-	    
-		RETVAL_ZVAL(result, 1, 1);
-    	efree(result);
+        if (is_single_column == 1) {
+            ZVAL_LONG(fetch_type, PDO_FETCH_COLUMN);
+        } else {
+            ZVAL_LONG(fetch_type, PDO_FETCH_ASSOC);
+        }
+
+        fetch_args[0] = &fetch_type;
+
+        if (yc_call_user_function_ex_fast(&statement, "fetchAll", &result, 1, fetch_args) == FAILURE) {
+            yc_zval_free(statement);
+            yc_zval_free(result);
+            yc_zval_ptr_dtor(&fetch_type);
+            RETURN_LONG(-1);
+        }
+
+        yc_zval_free(statement);
+        yc_zval_ptr_dtor(&fetch_type);
+        
+		//缓存数据
+        if(YC_IS_NOT_NULL(cache_key)) {
+            zval* cache_expire = php_yc_array_get_value(Z_ARRVAL_P(cache_info), "expire");
+            zval* real_expire = NULL;
+            if(YC_IS_NULL(cache_expire)) { //默认5分钟/300秒
+                YC_MAKE_STD_ZVAL(real_expire);
+                ZVAL_LONG(real_expire, 300);
+            } else {
+                real_expire = cache_expire;
+            }
+            
+            set_cache(cache_obj, cache_key, real_expire, result);
+        }
+		
+        RETVAL_ZVAL(result, 1, 1);
+        efree(result);
     } else {
-    	yc_zval_free(statement);
-		RETURN_LONG(-1);
+        yc_zval_free(statement);
+        RETURN_LONG(-1);
     }
 }
 
-char *select_context(char* table, zval* map, zval* join, zval* columns, zval* where, char** sql) {
+int set_cache(zval* cache_obj, zval* cache_key, zval* cache_expire, zval* cache_value) {
+    zval* set_string_value;
+    YC_MAKE_STD_ZVAL(set_string_value);
+    yc_serialize(set_string_value, cache_value);
+    
+    //set value
+    zval **set_args[2];
+    set_args[0] = &cache_key;
+    set_args[1] = &set_string_value;
+    int ret = yc_call_user_function_return_bool_or_unsigned(&cache_obj, "set", 2, set_args);
+    yc_zval_ptr_dtor(&set_string_value);
+    
+    //set expire time
+    if(ret == 1) {
+        zval **set_args[2];
+        set_args[0] = &cache_key;
+        set_args[1] = &cache_expire;
+        ret = yc_call_user_function_return_bool_or_unsigned(&cache_obj, "expire", 2, set_args);
+    }
+}
+
+zval* get_cache(zval* cache_obj, zval* cache_key) {
+    zval *ret_string = NULL;
+    zval **get_args[1];
+    get_args[0] = &cache_key;
+    
+    if (yc_call_user_function_ex_fast(&cache_obj, "get", &ret_string, 1, get_args) == FAILURE) {
+        yc_zval_free(ret_string);
+        return NULL;
+    }
+    
+    if (Z_TYPE_P(ret_string) != IS_STRING){
+        yc_zval_free(ret_string);
+        return NULL;
+    }
+    
+    zval *ret_array;
+    YC_ALLOC_INIT_ZVAL(ret_array);
+    yc_unserialize(ret_array, ret_string);
+    yc_zval_free(ret_string);
+    
+    if (YC_IS_NULL(ret_array) || Z_TYPE_P(ret_array) != IS_ARRAY) {
+        yc_zval_free(ret_array);
+        return NULL;
+    }
+    
+    return ret_array;
+}
+
+void del_cache(zval* cache_obj, zval* cache_info) {
+    if (YC_IS_NOT_NULL(cache_obj)) {
+        zval* cache_key = php_yc_array_get_value(Z_ARRVAL_P(cache_info), "key");
+        if(YC_IS_NOT_NULL(cache_key)) {
+            zval **del_args[1];
+            del_args[0] = &cache_key;
+            yc_call_user_function_return_bool_or_unsigned(&cache_obj, "del", 1, del_args);
+        }
+    }
+}
+
+char *select_context(char* table, zval* map, zval* join, zval* columns, zval* where, char** sql, zval** cache_info) {
     //表别名
     char* table_query;
     yc_string_emalloc_32(&table_query, 0);
@@ -862,29 +983,29 @@ char *select_context(char* table, zval* map, zval* join, zval* columns, zval* wh
             handle_join(join, table, &table_query);
         }
     } else {
-    	if(YC_IS_NULL(where)) { //第四个参数为空时，第二个参数为 column , 第三个参数为 where
-        	real_columns = join;
-        	real_where = columns;
-    	}
+        if (YC_IS_NULL(where)) { //第四个参数为空时，第二个参数为 column , 第三个参数为 where
+            real_columns = join;
+            real_where = columns;
+        }
     }
 
     //选择要查询的列
     char* column_query;
     yc_string_emalloc_32(&column_query, 0);
-    
+
     column_push(real_columns, map, &column_query);
 
     yc_multi_memcpy_auto_realloc(sql, 4, "SELECT ", column_query, " FROM ", table_query);
 
     yc_string_efree_32(column_query);
     yc_string_efree_32(table_query);
-
-    where_clause(real_where, map, sql);
+		
+    where_clause(real_where, map, sql, cache_info);
     return *sql;
 }
 
 //处理 where 条件
-char* where_clause(zval* where, zval* map, char** sql) {
+char* where_clause(zval* where, zval* map, char** sql, zval** cache_info) {
     if (YC_IS_EMPTY(where)) {
         return *sql;
     }
@@ -919,6 +1040,8 @@ char* where_clause(zval* where, zval* map, char** sql) {
             } else if (strcmp(key, "LIMIT") == 0) { //结果条数
                 yc_string_emalloc_32(&limit_condition, 0);
                 limit_implode(value, &limit_condition);
+            }  else if (strcmp(key, "CACHE") == 0) { //结果条数
+            		*cache_info = value;
             } else { // where clause
                 where_implode(key, value, map, &where_condition, "AND");
             }
@@ -1385,7 +1508,7 @@ char* column_quote(char* string, char* table_column) {
     if (strlen(tmp) >= MAX_TABLE_SIZE) {
         yc_php_fatal_error(E_ERROR, "column size is too long, [%s]", string);
     }
-    
+
     if (yc_strpos(tmp, ".") >= 0) {
         if (strlen(tmp) + 5 >= MAX_TABLE_SIZE) {
             yc_php_fatal_error(E_ERROR, "column + alias size is too long, [%s]", string);
@@ -1684,25 +1807,25 @@ zend_class_entry* get_pdo_ce() {
 void update_error_info(zval* obj, char* code, char* errmsg) {
     zend_update_property_string(ycdb_ce_ptr, obj, ZEND_STRL("errcode"), code TSRMLS_CC);
     zval* errorinfo = yc_read_init_property(ycdb_ce_ptr, obj, ZEND_STRL("errinfo") TSRMLS_CC);
-    
-    if(errorinfo != NULL) {
-    	zend_update_property_null(ycdb_ce_ptr, obj, ZEND_STRL("errinfo"));
+
+    if (errorinfo != NULL) {
+        zend_update_property_null(ycdb_ce_ptr, obj, ZEND_STRL("errinfo"));
     }
-    
-	zval* error_array;
-	YC_MAKE_STD_ZVAL(error_array);
-	array_init(error_array);
 
-	add_index_string(error_array, 0, code);
-	if (strcmp(code, "00000") == 0) {
-		add_index_long(error_array, 1, 0);
-	} else {
-		add_index_long(error_array, 1, -1);
-	}
-	add_index_string(error_array, 2, errmsg);
+    zval* error_array;
+    YC_MAKE_STD_ZVAL(error_array);
+    array_init(error_array);
 
-	zend_update_property(ycdb_ce_ptr, obj, ZEND_STRL("errinfo"), error_array TSRMLS_CC);
-	yc_zval_ptr_dtor(&error_array);
+    add_index_string(error_array, 0, code);
+    if (strcmp(code, "00000") == 0) {
+        add_index_long(error_array, 1, 0);
+    } else {
+        add_index_long(error_array, 1, -1);
+    }
+    add_index_string(error_array, 2, errmsg);
+
+    zend_update_property(ycdb_ce_ptr, obj, ZEND_STRL("errinfo"), error_array TSRMLS_CC);
+    yc_zval_ptr_dtor(&error_array);
 }
 
 void update_pdo_error(zval* obj, zval* errorcode, zval* errorinfo) {

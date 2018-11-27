@@ -41,6 +41,7 @@
 #include "php7_wrapper.h"
 #include "ycdatabase_config.h"
 #include "error.h"
+#include <ext/standard/php_var.h>
 
 /////////////////////////////// 公共宏定义 //////////////////////////////////
 #define YC_OK                  0
@@ -134,6 +135,8 @@ extern char* rtrim_str(char *str, char *remove);
 extern char* yc_itoa(int num,char* str);
 extern char* yc_escape(char* sql);
 extern char* strreplace(char* original, char const * const pattern, char const * const replacement);
+extern void yc_serialize(zval *return_value, zval *var TSRMLS_DC);
+extern void yc_unserialize(zval *return_value, zval *var TSRMLS_DC);
 
 /////////////////// array.c ////////////////////////////
 extern char* yc_get_string_from_array_index(zval *array, ulong index);

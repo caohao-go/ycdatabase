@@ -50,12 +50,12 @@ PHP_METHOD(ycdb, errorCode);
 PHP_METHOD(ycdb, errorInfo);
 
 //私有函数
-char* select_context(char* table, zval* map, zval* join, zval* columns, zval* where, char** sql);
+char* select_context(char* table, zval* map, zval* join, zval* columns, zval* where, char** sql, zval** cache_info);
 char* handle_join(zval* join, char* table, char** table_query);
 char* column_quote(char* string, char* table_column);
 char* get_join_type(char* type);
 char* column_push(zval* columns, zval* map, char** column_query);
-char* where_clause(zval* where, zval* map, char** where_query);
+char* where_clause(zval* where, zval* map, char** where_query, zval** cache_info);
 char* where_implode(char* key, zval* data, zval* map, char** where_clause, char* connector);
 char* group_by_implode(zval* group, char** group_by_condition);
 char* having_implode(zval* having, zval* map, char** having_condition);
@@ -69,6 +69,9 @@ zval* add_map(zval* map, char* mapkey, zval* value);
 void update_error_info(zval* obj, char* code, char* errmsg);
 void update_pdo_error(zval* obj, zval* errorcode, zval* errorinfo);
 int is_write_type(char* sql);
+int set_cache(zval* cache_obj, zval* cache_key, zval* cache_expire, zval* cache_value);
+zval* get_cache(zval* cache_obj, zval* cache_key);
+void del_cache(zval* cache_obj, zval* cache_info);
 
 //preg函数
 int preg_join_match(char* key, char* join, char* table, char* alias); //匹配join表

@@ -35,7 +35,6 @@ static yc_inline size_t get_string_emalloc_size(char* source) {
 char* yc_multi_memcpy_auto_realloc(char** source, int n_value, ...) {
 	int source_size = get_string_emalloc_size(*source);
 	
-	//����Ŀ���ַ�������
 	va_list var_arg;
 	int count = 0;
 	int dest_len = strlen(*source) + 1;
