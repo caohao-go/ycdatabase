@@ -609,9 +609,9 @@ if($ret1 == -1 || $ret2 == -1 ) {
 
 ## Data Caching
 
-We can use redis, or any other cache system that supports set/get/del/expire function as the medium to store the data returned by the database. If you do not specify the expiration time, the default storage expiration time is 5 minutes. if The cache is specified. When we call data update function such as update/delete/insert, we should pass in the same cache key so that ycdb can clear the cache.<br><br>
+We can use redis, or any other cache system that supports set/get/del/expire function as the medium to store the data returned by the database. If you do not specify the expiration time, the default storage expiration time is 5 minutes. if The cache is specified. When we call data update function such as update/delete/insert, we should pass in the same cache key so that ycdb can clear the cache to ensure data consistency.<br><br>
 
-_我们可以以 redis,或者其他任何支持 set/get/del/expire 这4种方法的缓存系统作为介质，存储 database 返回的数据，如果不指定到期时间，默认存储到期时间为5分钟，当我们指定了缓存，如果对数据有update/delete/insert等更新操作，我们最好是传入相同的缓存key，以便ycdb能够清理缓存_
+_我们可以以 redis,或者其他任何支持 set/get/del/expire 这4种方法的缓存系统作为介质，存储 database 返回的数据，如果不指定到期时间，默认存储到期时间为5分钟，当我们指定了缓存，如果对数据有update/delete/insert等更新操作，我们最好是传入相同的缓存key，以便ycdb能够清理缓存来保持数据的一致性_
 ```php
 //we 
 $redis = new Redis();
@@ -637,5 +637,42 @@ try{
   exit;
 }
 
+// I want to keep the 29-year-old user data queried by the database in the cache, and keep it for 10 minutes.
+$age = 29;
+$cache_key = 'pre_cache_key_' . $age;
 
+$data = $ycdb->select("user_info_test", "*", [
+	'age' => $age,
+	'CACHE' => ['key' => $cache_key, 'expire' => 600]   //cache key an expire time (seconds)
+]);
+
+echo $redis->get($cache_key) . "\n";
+
+// If I update these 29-year-old user data, or even add a new 29-year-old user information, 
+// it's best to enter the cache key to clean up the cache to keep the data consistent.
+$ycdb->update("user_info_test", ['remark' => '29-year-old'], [
+  'age' => $age,
+  'CACHE' => ['key' => $cache_key]  //cache key
+]);
+
+echo $redis->get($cache_key) . "\n";
+
+//If you are going to delete the relevant data, it is best to also clean up the cache.
+$ycdb->delete("user_info_test", [
+  'age' => $age,
+  'CACHE' => ['key' => $cache_key]  //cache key
+]);
+
+echo $redis->get($cache_key) . "\n";
+
+//Clean up the cache when the data you insert is related to the cached data.
+$insert_data = array();
+$insert_data['username'] = 'test';
+$insert_data['sexuality'] = 'male';
+$insert_data['age'] = 29;
+$insert_data['height'] = 176;
+
+$data = $ycdb->insert("user_info_test", $insert_data, ['key' => $cache_key]);
+
+echo $redis->get($cache_key) . "\n";
 ```
