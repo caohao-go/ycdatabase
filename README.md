@@ -620,10 +620,10 @@ _我们可以以 redis,或者其他任何支持 set/get/del/expire 这4种方法
 $redis = new Redis();
 $redis->connect('/home/redis/pid/redis.sock');
 
-$option = array("host" => "47.106.114.151", 
-                "username" => "root", 
-                "password" => "cao123123", 
-                "dbname" => "dabaojian", 
+$option = array("host" => "127.0.0.1", 
+                "username" => "test", 
+                "password" => "test", 
+                "dbname" => "test", 
                 "port" => '3306',
                 "cache" => $redis,  //cache instance
                 'option' => array(
