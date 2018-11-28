@@ -660,7 +660,7 @@ $ycdb->update("user_info_test", ['remark' => '29-year-old'], [
 
 echo $redis->get($cache_key) . "\n";
 
-//If you are going to delete the relevant data, it is best to also clean up the cache.
+//If you are going to delete the relevant data, it is best to also clean up the cache by cache_key.
 $ycdb->delete("user_info_test", [
   'age' => $age,
   'CACHE' => ['key' => $cache_key]  //cache key
@@ -668,7 +668,7 @@ $ycdb->delete("user_info_test", [
 
 echo $redis->get($cache_key) . "\n";
 
-//Clean up the cache when the data you insert is related to the cached data.
+//Clean up the cache by cache_key when the data you insert is related to the cached data.
 $insert_data = array();
 $insert_data['username'] = 'test';
 $insert_data['sexuality'] = 'male';
