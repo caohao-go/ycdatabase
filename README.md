@@ -699,3 +699,20 @@ Let's focus on Nginx, its stream module implements load balancing of TCP/UDP ser
 _我们不妨绕着走。让我们把目光聚焦到 Nginx 的身上，其 stream 模块实现了 TCP/UDP 服务的负载均衡，同时借助 stream-lua 模块，我们就可以实现可编程的 stream 服务，也就是用 Nginx 实现自定义的 TCP/UDP 服务！当然你可以自己从头写 TCP/UDP 服务，不过站在 Nginx 肩膀上无疑是更省时省力的选择。我们可以选择 OpenResty 库来完成MySQL的连接池功能，OpenResty是一个非常强大，而且功能完善的Nginx Lua框架，他封装了Socket、MySQL, Redis, Memcache 等操作，可是 Nginx 和 PHP 连接池有什么关系？且听我慢慢道来：通常大部分 PHP 是搭配 Nginx 来使用的，而且 PHP 和 Nginx 多半是在同一台服务器上。有了这个客观条件，我们就可以利用 Nginx 来实现一个连接池，在 Nginx 上完成连接 MySQL 等服务的工作，然后 PHP 通过本地的 Unix Domain Socket 来连接 Nginx，如此一来既规避了短链接的种种弊端，也享受到了连接池带来的种种好处。_
 
 
+### OpenResty Install
+OpenResty Document: https://moonbingbing.gitbooks.io/openresty-best-practices/content/openresty/install_on_centos.html
+
+CentOS 6.8 Install :
+```
+///// Install the necessary libraries ////
+$yum install readline-devel pcre-devel openssl-devel perl
+
+//// Install OpenResty ////
+$cd ~/ycdatabase/openresty
+$tar -xzvf openresty-1.13.6.1.tar.gz
+$cd openresty-1.13.6.1
+$./configure --prefix=/usr/local/openresty.1.13 --with-luajit --without-http_redis2_module --with-http_iconv_module
+$make && make install
+
+
+```
