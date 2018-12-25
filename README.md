@@ -721,7 +721,7 @@ $/usr/local/openresty.1.13/nginx/sbin/nginx -p ~/openresty-pool
 ```
 
 #### MySQL Address Modify
-~/openresty-pool/conf/nginx.conf , 
+~/openresty-pool/conf/nginx.conf  :
 
 ```lua
 worker_processes  1;        #nginx worker 数量
@@ -741,13 +741,13 @@ stream {
 # listen unix:/tmp/redis_pool.sock;
 
 # content_by_lua_block {
-#    local redis_pool = require "redis_pool"
+#     local redis_pool = require "redis_pool"
 			
-#    pool = redis_pool:new({ip = "127.0.0.1", port = 6379})
+#     pool = redis_pool:new({ip = "127.0.0.1", port = 6379})
 
-#    pool:run()
-#  }
-#}
+#     pool:run()
+#   }
+# }
 	
   server {
     listen unix:/tmp/mysql_pool.sock;
