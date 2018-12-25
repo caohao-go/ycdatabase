@@ -712,7 +712,8 @@ $cd ~/ycdatabase/openresty
 $tar -xzvf openresty-1.13.6.1.tar.gz
 $cd openresty-1.13.6.1
 $./configure --prefix=/usr/local/openresty.1.13 --with-luajit --without-http_redis2_module --with-http_iconv_module
-$make && make install
+$gmake 
+$gmake install
 
 ###### open mysql pool ######
 $cp -rf ~/ycdatabase/openresty/openresty-pool ~/
@@ -770,7 +771,7 @@ stream {
 }
 ```
 
-If you have more than a MySQL Server, you can start another server and add a new listener to unix domain socket.
+If you have more than a MySQL Server, you can start another server and add a new listener to unix domain socket.<br>
 _如果你有多个 MySQL， 你可以另起一个server ， 并在listen unix 上再加一个新的监听_
 
 
