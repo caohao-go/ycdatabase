@@ -42,6 +42,7 @@ CREATE TABLE `user_info_test` (
 
 ## Compire ycdatabase in linux
 ```
+$cd ~/ycdatabase/ycdatabase_extension
 $/path/to/phpize
 $./configure --with-php-config=/path/to/php-config
 $make && make install
