@@ -772,7 +772,7 @@ stream {
 ```
 
 If you have more than a MySQL Server, you can start another server and add a new listener to unix domain socket.<br>
-_如果你有多个 MySQL， 你可以另起一个 server ， 并在listen unix 上再加一个新的监听_
+_你可以另起一个 server ， 并在listen unix 之后新增一个unix domain socket监听。_
 
 ### PHP Code
 Except the option is array("unix_socket" => "/tmp/mysql_pool.sock") , Php mysql connection pool usage is exactly the same as before,But, MySQL does not support transactions in unix domain socket mode.<br>
