@@ -42,7 +42,6 @@ CREATE TABLE `user_info_test` (
 
 ## Compire ycdatabase in linux
 ```
-$cd ~/ycdatabase/ycdatabase_extension
 $/path/to/phpize
 $./configure --with-php-config=/path/to/php-config
 $make && make install
@@ -100,7 +99,7 @@ if($ret == -1) {
 
 - update data
 
- ![Image](https://github.com/caohao0730/ycdatabase/ycdatabase_extension/blob/master/image-folder/table.jpg)
+ ![Image](https://github.com/caohao0730/ycdatabase/blob/master/ycdatabase_extension/image-folder/table.jpg)
 
 if we execute the following update statement, $ret returns 3 if the current data is the above image.
 ```php
@@ -113,7 +112,7 @@ echo $ret; //ret is 3
 $ret = $ycdb->query("select * from user_info_test where bool_flag=1");
 var_dump($ret);
 ```
- ![Image](https://github.com/caohao0730/ycdatabase/ycdatabase_extension/blob/master/image-folder/query_select.jpg)
+ ![Image](https://github.com/caohao0730/ycdatabase/blob/master/ycdatabase_extension/image-folder/query_select.jpg)
  
 ## Error Info
 
