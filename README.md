@@ -714,5 +714,61 @@ $cd openresty-1.13.6.1
 $./configure --prefix=/usr/local/openresty.1.13 --with-luajit --without-http_redis2_module --with-http_iconv_module
 $make && make install
 
-
+//// open mysql pool ///
+$cp -rf ~/ycdatabase/openresty/openresty-pool ~/
+$/usr/local/openresty.1.13/nginx/sbin/nginx -p ~/openresty-pool
 ```
+
+### MySQL Address Modify
+~/openresty-pool/conf/nginx.conf , 
+
+```lua
+worker_processes  1;        #nginx worker 数量
+
+error_log logs/error.log;   #指定错误日志文件路径
+
+events {
+    worker_connections 1024;
+}
+
+stream {
+  lua_code_cache on;
+
+  lua_check_client_abort on;
+
+# server {
+# listen unix:/tmp/redis_pool.sock;
+
+# content_by_lua_block {
+#    local redis_pool = require "redis_pool"
+			
+#    pool = redis_pool:new({ip = "127.0.0.1", port = 6379})
+
+#    pool:run()
+#  }
+#}
+	
+  server {
+    listen unix:/tmp/mysql_pool.sock;
+		
+    content_by_lua_block {
+      local mysql_pool = require "mysql_pool"
+			
+      local config = {host = "127.0.0.1", 
+                      user = "root", 
+                      password = "test", 
+                      database = "collect", 
+                      timeout = 2000, 
+                      max_idle_timeout = 10000, 
+                      pool_size = 200}
+						   
+      pool = mysql_pool:new(config)
+			
+      pool:run()
+    }
+  }
+}
+```
+
+If you have more than a MySQL Server, you can start another server and add a new listener to unix domain socket.
+_如果你有多个 MySQL， 你可以另起一个server ， 并在listen unix 上再加一个新的监听_
