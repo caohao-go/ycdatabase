@@ -693,33 +693,33 @@ echo $redis->get($cache_key) . "\n";
 ycdb uses a special way to establish a stable connection pool with MySQL. According to PHP's operating mechanism, long connections can only reside on top of the worker process after establishment, that is, how many work processes are there. How many long connections, for example, we have 10 PHP servers, each launching 1000 PHP-FPM worker processes, they connect to the same MySQL instance, then there will be a maximum of 10,000 long connections on this MySQL instance, the number is completely Out of control! And PHP's connection pool heartbeat mechanism is not perfect<br><br>
 _ycdb通过一种特殊的方式来建立一个稳定的与MySQL之间的连接池，按照 PHP 的运行机制，长连接在建立之后只能寄居在工作进程之上，也就是说有多少个工作进程，就有多少个长连接，打个比方，我们有 10 台 PHP 服务器，每台启动 1000 个 PHP-FPM 工作进程，它们连接同一个 MySQL 实例，那么此 MySQL 实例上最多将存在 10000 个长连接，数量完全失控了！而且PHP的连接池心跳机制不完善_
 
-### How ?
+#### How ?
 Let's focus on Nginx, its stream module implements load balancing of TCP/UDP services, and with the stream-lua module, we can implement programmable stream services, that is, custom TCP/N with Nginx. UDP service! Of course, you can write TCP/UDP services from scratch, but standing on Nginx's shoulder is a more time-saving and labor-saving choice. We can choose the OpenResty library to complete the MySQL connection pool function. OpenResty is a very powerful and well-functioning Nginx Lua framework. It encapsulates Socket, MySQL, Redis, Memcache, etc. But what is the relationship between Nginx and PHP connection pool? And listen to me slowly: Usually most PHP is used with Nginx, and PHP and Nginx are mostly on the same server. With this objective condition, we can use Nginx to implement a connection pool, connect to services such as MySQL on Nginx, and then connect to Nginx through a local Unix Domain Socket, thus avoiding all kinds of short links. Disadvantages, but also enjoy the benefits of the connection pool.
 
 _我们不妨绕着走。让我们把目光聚焦到 Nginx 的身上，其 stream 模块实现了 TCP/UDP 服务的负载均衡，同时借助 stream-lua 模块，我们就可以实现可编程的 stream 服务，也就是用 Nginx 实现自定义的 TCP/UDP 服务！当然你可以自己从头写 TCP/UDP 服务，不过站在 Nginx 肩膀上无疑是更省时省力的选择。我们可以选择 OpenResty 库来完成MySQL的连接池功能，OpenResty是一个非常强大，而且功能完善的Nginx Lua框架，他封装了Socket、MySQL, Redis, Memcache 等操作，可是 Nginx 和 PHP 连接池有什么关系？且听我慢慢道来：通常大部分 PHP 是搭配 Nginx 来使用的，而且 PHP 和 Nginx 多半是在同一台服务器上。有了这个客观条件，我们就可以利用 Nginx 来实现一个连接池，在 Nginx 上完成连接 MySQL 等服务的工作，然后 PHP 通过本地的 Unix Domain Socket 来连接 Nginx，如此一来既规避了短链接的种种弊端，也享受到了连接池带来的种种好处。_
 
 
-### OpenResty Install
+#### OpenResty Install
 OpenResty Document: https://moonbingbing.gitbooks.io/openresty-best-practices/content/openresty/install_on_centos.html
 
 CentOS 6.8 Install :
 ```
-///// Install the necessary libraries ////
+###### Install the necessary libraries ######
 $yum install readline-devel pcre-devel openssl-devel perl
 
-//// Install OpenResty ////
+###### Install OpenResty ######
 $cd ~/ycdatabase/openresty
 $tar -xzvf openresty-1.13.6.1.tar.gz
 $cd openresty-1.13.6.1
 $./configure --prefix=/usr/local/openresty.1.13 --with-luajit --without-http_redis2_module --with-http_iconv_module
 $make && make install
 
-//// open mysql pool ///
+###### open mysql pool ######
 $cp -rf ~/ycdatabase/openresty/openresty-pool ~/
 $/usr/local/openresty.1.13/nginx/sbin/nginx -p ~/openresty-pool
 ```
 
-### MySQL Address Modify
+#### MySQL Address Modify
 ~/openresty-pool/conf/nginx.conf , 
 
 ```lua
@@ -772,3 +772,5 @@ stream {
 
 If you have more than a MySQL Server, you can start another server and add a new listener to unix domain socket.
 _如果你有多个 MySQL， 你可以另起一个server ， 并在listen unix 上再加一个新的监听_
+
+
