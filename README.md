@@ -775,6 +775,9 @@ If you have more than a MySQL Server, you can start another server and add a new
 _如果你有多个 MySQL， 你可以另起一个 server ， 并在listen unix 上再加一个新的监听_
 
 ### PHP Code
+Except the option is array("unix_socket" => "/tmp/mysql_pool.sock") , Php mysql connection pool usage is exactly the same as before,But, MySQL does not support transactions in unix domain socket mode.<br>
+_除了option 配置为 array("unix_socket" => "/tmp/mysql_pool.sock") 之外，php的mysql连接池使用方法和之前一模一样，另外， unix_socket 方式的 MySQL 不支持事务。_
+
 ```php
 $option = array("unix_socket" => "/tmp/mysql_pool.sock");
 $ycdb = new ycdb($option);
