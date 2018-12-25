@@ -772,7 +772,7 @@ stream {
 ```
 
 If you have more than a MySQL Server, you can start another server and add a new listener to unix domain socket.<br>
-_如果你有多个 MySQL， 你可以另起一个server ， 并在listen unix 上再加一个新的监听_
+_如果你有多个 MySQL， 你可以另起一个 server ， 并在listen unix 上再加一个新的监听_
 
 ### PHP Code
 ```php
