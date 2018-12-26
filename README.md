@@ -800,6 +800,9 @@ if($ret == -1) {
 ```
 
 ### MySQL Pool Lua
+
+ ~/openresty-pool/mysql_pool.lua
+ 
 ```lua
 local mysql = require "resty.mysql"
 local cjson = require "cjson"
