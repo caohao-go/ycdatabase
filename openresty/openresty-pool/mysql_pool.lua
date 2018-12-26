@@ -79,8 +79,6 @@ local function response_success(sock, result)
 	
 	local send_str = cjson.encode(ret)
 	
-	ngx.log(ngx.ERR, "response_success : send_str=[", send_str, "]")
-	
 	local ret, err = sock:send(string.len(send_str) ..  "\n" .. send_str)
 	
 	if not ret then
