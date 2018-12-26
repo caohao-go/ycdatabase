@@ -69,6 +69,7 @@ zval* add_map(zval* map, char* mapkey, zval* value);
 void update_error_info(zval* obj, char* code, char* errmsg);
 void update_pdo_error(zval* obj, zval* errorcode, zval* errorinfo);
 int is_write_type(char* sql);
+int is_insert(char* sql);
 int set_cache(zval* cache_obj, zval* cache_key, zval* cache_expire, zval* cache_value);
 zval* get_cache(zval* cache_obj, zval* cache_key);
 void del_cache(zval* cache_obj, zval* cache_info);

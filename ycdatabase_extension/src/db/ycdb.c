@@ -325,6 +325,7 @@ PHP_METHOD(ycdb, exec) {
 
     //判断是否数据库 WRITE 写操作，或者 SELECT 查询
     int is_write = is_write_type(Z_STRVAL_P(query));
+    int isinsert = is_insert(Z_STRVAL_P(query));
     
     //unix socket
     zval* unix_socket = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("unix_socket") TSRMLS_CC);
@@ -434,14 +435,17 @@ PHP_METHOD(ycdb, exec) {
 		zval* data = php_yc_array_get_value(Z_ARRVAL_P(recv_array), "data");
         	
         if(is_write) {
-        	zval* affect_rows = php_yc_array_get_value(Z_ARRVAL_P(data), "affected_rows");
-        	int row_count = Z_LVAL_P(affect_rows);
+        	zval* return_info = NULL;
+        	if(isinsert) {
+        		return_info = php_yc_array_get_value(Z_ARRVAL_P(data), "insert_id");
+        	} else {
+        		return_info = php_yc_array_get_value(Z_ARRVAL_P(data), "affected_rows");
+        	}
         	
-        	zval* insert_id = php_yc_array_get_value(Z_ARRVAL_P(data), "insert_id");
-        	zend_update_property_long(ycdb_ce_ptr, thisObject, ZEND_STRL("insert_id"), Z_LVAL_P(insert_id) TSRMLS_DC);
+        	int return_int = Z_LVAL_P(return_info);
         	
 			yc_zval_ptr_dtor(&recv_array);
-            RETURN_LONG(row_count);
+            RETURN_LONG(return_int);
         } else {
         	//是否单列
 		    int ret_count = zend_hash_num_elements(Z_ARRVAL_P(data));
@@ -587,9 +591,28 @@ PHP_METHOD(ycdb, exec) {
         yc_zval_free(errorInfo);
     
         if (is_write) {
-            int row_count = yc_call_user_function_return_bool_or_unsigned(&statement, "rowCount", 0, NULL);
-            yc_zval_free(statement);
-            RETURN_LONG(row_count);
+        	if(isinsert) {
+        		zval* insertid = NULL;
+        		yc_zval_free(statement);
+        		
+        		if (yc_call_user_function_ex_fast(&pdo, "lastInsertId", &insertid, 0, NULL) == FAILURE) {
+			        yc_zval_free(insertid);
+			        yc_php_fatal_error(E_ERROR, "failed to get lastInsertId");
+			        RETURN_LONG(-1);
+			    }
+			
+			    if (EG(exception) || YC_IS_NULL(insertid)) {
+			        yc_zval_free(insertid);
+			        RETURN_MY_ERROR("failed to get lastInsertId, pdo is not initialized");
+			    }
+			
+			    RETVAL_ZVAL(insertid, 1, 1);
+			    efree(insertid);
+        	} else {
+            	int row_count = yc_call_user_function_return_bool_or_unsigned(&statement, "rowCount", 0, NULL);
+           	 	yc_zval_free(statement);
+            	RETURN_LONG(row_count);
+        	}
         } else {
             RETVAL_ZVAL(statement, 1, 1);
             efree(statement);
@@ -2060,6 +2083,43 @@ int is_write_type(char* sql) {
     if (strcmp(operator, "INSERT") == 0 || strcmp(operator, "UPDATE") == 0 || strcmp(operator, "DELETE") == 0 || strcmp(operator, "REPLACE") == 0
             || strcmp(operator, "SET") == 0 || strcmp(operator, "CREATE") == 0 || strcmp(operator, "DROP") == 0 || strcmp(operator, "TRUNCATE") == 0
             || strcmp(operator, "ALTER") == 0 || strcmp(operator, "LOCK") == 0 || strcmp(operator, "UNLOCK") == 0) {
+        return 1;
+    }
+
+    return 0;
+}
+
+int is_insert(char* sql) {
+    char *start = sql;
+    int sql_len = strlen(sql);
+    int i=0, len=0;
+    char operator[10] = {0};
+
+    while (i < sql_len) {
+        i++;
+        if (!isspace(*start) && (*start) != '\n' && (*start) != '\r' && (*start) != '\t') {
+            break;
+        }
+        start++;
+    }
+
+    char* end = start;
+
+    while (i < sql_len && len < 8) {
+        if (isspace(*end) || (*end) == '\n' || (*end) == '\r' || (*end) == '\t') {
+            break;
+        }
+
+        end++;
+        i++;
+        len++;
+    }
+
+    memcpy(operator, start, len + 1);
+    rtrim(operator);
+    php_strtoupper(operator, strlen(operator));
+
+    if (strcmp(operator, "INSERT") == 0) {
         return 1;
     }
 

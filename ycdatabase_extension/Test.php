@@ -31,13 +31,15 @@ try{
 	exit;
 }
 
-$ret = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) 
+$insert_id = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) 
                     values('smallhow', 'male', 29, 180)");
-if($ret == -1) {
+if($insert_id == -1) {
     $code = $ycdb->errorCode();
     $info = $ycdb->errorInfo();
     echo "code:" . $code . "\n";
     echo "info:" . $info[2] . "\n";
+} else {
+	echo $insert_id;
 }
 
 $ret = $ycdb->exec("update user_info_test set remark='test' where height>=180");
@@ -187,15 +189,15 @@ $ycdb->select("user_info_test", "id", [
 
 
 $data = array('username' => 'smallhow','sexuality' => 'male','age' => 35, 'height' => '168');
-$ret = $ycdb->insert("user_info_test", $data);
-if($ret == -1) {
+$insert_id = $ycdb->insert("user_info_test", $data);
+if($insert_id == -1) {
 	$code = $ycdb->errorCode();
 	$info = $ycdb->errorInfo();
 	echo "code:" . $code . "\n";
 	echo "info:" . $info[2] . "\n";
+} else {
+	echo $insert_id;
 }
-
-$ret = $ycdb->insert_id();
 
 $data = array('height' => 182,'age' => 33);
 $where = array('username' => 'smallhow');

@@ -82,7 +82,7 @@ local function response_success(sock, result)
 	local ret, err = sock:send(string.len(send_str) ..  "\n" .. send_str)
 	
 	if not ret then
-		ngx.log(ngx.ERR, "response success failed : [", err, "], send_str=[", send_str, "]")
+		ngx.log(ngx.ERR, "mysql response success failed : [", err, "], send_str=[", send_str, "]")
 		return nil, err
 	end
 end
@@ -99,7 +99,7 @@ local function response_error(sock, errno, errmsg, sqlstate)
 	local ret, err = sock:send(string.len(send_str) ..  "\n" .. send_str)
 	
 	if not ret then
-		ngx.log(ngx.ERR, "response error failed : [", err, "], send_str=[", send_str, "]")
+		ngx.log(ngx.ERR, "mysql response error failed : [", err, "], send_str=[", send_str, "]")
 		return nil, err
 	end
 end
@@ -114,7 +114,7 @@ end
 
 -- 异常退出
 local function exit(err)
-    ngx.log(ngx.ERR, "ERROR EXIT: [", err, "]")
+    ngx.log(ngx.ERR, "MySQL ERROR EXIT: [", err, "]")
     return ngx.exit(ngx.ERROR)
 end
 
@@ -170,14 +170,14 @@ function _M.run(self)
 	if result then
 		response_success(downstream_sock, result)
 	else
-		ngx.log(ngx.ERR, "query failed: [", errno, "][", sqlstate, "][",err , "]")
+		ngx.log(ngx.ERR, "mysql query failed: [", errno, "][", sqlstate, "][",err , "]")
 		response_error(downstream_sock, errno, err, sqlstate)
 	end
 	
 	-- 设置 mysql 连接池
 	local ok, err = db:set_keepalive(self._max_idle_timeout, self._pool_size)
 	if not ok then
-		ngx.log(ngx.ERR, "set_keepalive failed: [", err, "]")
+		ngx.log(ngx.ERR, "mysql set_keepalive failed: [", err, "]")
 	end
 end
 
