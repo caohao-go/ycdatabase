@@ -17,7 +17,7 @@
   - Whole Example
   - Database Transaction
   - Data Caching
-  - MySQL Database Pool
+  - MySQL Database Connection Pool
   
 ## Instruction
   1、ycdb is an mysql database orm written in c, built in php extension, as we known, database ORM is a very time-consuming operation, especially for interpretive languages such as PHP, and for a project, the proportion of ORM is very high,so here I will implement the MySQL ORM operation in C language, and use the performance of C language to improve the performance of ORM.<br>
@@ -694,7 +694,7 @@ $data = $ycdb->insert("user_info_test", $insert_data, ['key' => $cache_key]);
 echo $redis->get($cache_key) . "\n";
 ```
 
-## MySQL Database Pool
+## MySQL Database Connection Pool
 
 Short connection performance is generally not available. CPU resources are consumed by the system. Once the network is jittered, there will be a large number of TIME_WAIT generated. The service has to be restarted periodically or the machine is restarted periodically. The server is unstable, QPS is high and low, and the connection is stable and efficient. The pool can effectively solve the above problems, it is the basis of high concurrency. ycdb uses a special way to establish a stable connection pool with MySQL. performance can be increased by at least 30%, According to PHP's operating mechanism, long connections can only reside on top of the worker process after establishment, that is, how many work processes are there. How many long connections, for example, we have 10 PHP servers, each launching 1000 PHP-FPM worker processes, they connect to the same MySQL instance, then there will be a maximum of 10,000 long connections on this MySQL instance, the number is completely Out of control! And PHP's connection pool heartbeat mechanism is not perfect<br><br>
 _短连接性能普遍上不去，CPU 大量资源被系统消耗，网络一旦抖动，会有大量 TIME_WAIT 产生，不得不定期重启服务或定期重启机器，服务器工作不稳定，QPS 忽高忽低，稳定高效的连接池可以有效的解决上述问题，它是高并发的基础，ycdb通过一种特殊的方式来建立一个稳定的与MySQL之间的连接池，性能至少提升30%，按照 PHP 的运行机制，长连接在建立之后只能寄居在工作进程之上，也就是说有多少个工作进程，就有多少个长连接，打个比方，我们有 10 台 PHP 服务器，每台启动 1000 个 PHP-FPM 工作进程，它们连接同一个 MySQL 实例，那么此 MySQL 实例上最多将存在 10000 个长连接，数量完全失控了！而且PHP的连接池心跳机制不完善_
@@ -726,7 +726,7 @@ $cp -rf ~/ycdatabase/openresty/openresty-pool ~/
 $/usr/local/openresty.1.13/nginx/sbin/nginx -p ~/openresty-pool
 ```
 
-### MySQL Database Pool Config
+### MySQL Database Connection Pool Config
 ~/openresty-pool/conf/nginx.conf  :
 
 ```lua
@@ -799,7 +799,7 @@ if($ret == -1) {
 }
 ```
 
-### MySQL Pool Lua
+### MySQL Connection Pool Lua Code
 
  ~/openresty-pool/mysql_pool.lua
  
