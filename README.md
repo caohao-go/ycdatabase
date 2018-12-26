@@ -126,7 +126,7 @@ echo json_encode($ret);
  $ret = $ycdb->query("select username from user_info_test where bool_flag=1");
 echo json_encode($ret);
 ```
-![Image](https://github.com/caohao0730/ycdatabase/blob/master/ycdatabase_extension/image-folder/query_single.jpg)
+![Image](https://github.com/caohao0730/ycdatabase/blob/master/ycdatabase_extension/image-folder/query_single.png?raw=true)
 
 ## Error Info
 
