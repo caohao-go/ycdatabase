@@ -118,10 +118,16 @@ echo $ret; //ret is 3
 - select data
 ```php
 $ret = $ycdb->query("select * from user_info_test where bool_flag=1");
-var_dump($ret);
+echo json_encode($ret);
 ```
  ![Image](https://github.com/caohao0730/ycdatabase/blob/master/ycdatabase_extension/image-folder/query_select.jpg)
- 
+
+```php
+ $ret = $ycdb->query("select username from user_info_test where bool_flag=1");
+echo json_encode($ret);
+```
+![Image](https://github.com/caohao0730/ycdatabase/blob/master/ycdatabase_extension/image-folder/query_single.jpg)
+
 ## Error Info
 
 Error codes and error messages can be obtained through the errorCode and errorInfo function<br>
