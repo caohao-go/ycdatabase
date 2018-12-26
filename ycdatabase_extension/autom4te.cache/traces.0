@@ -264,13 +264,13 @@ m4trace:configure.ac:134: -1- AC_SUBST([AWK])
 m4trace:configure.ac:134: -1- AC_SUBST_TRACE([AWK])
 m4trace:configure.ac:134: -1- m4_pattern_allow([^AWK$])
 m4trace:configure.ac:136: -1- sinclude([config.m4])
-m4trace:config.m4:14: -1- AC_DEFINE_TRACE_LITERAL([HAVE_YCDATABASE])
-m4trace:config.m4:14: -1- m4_pattern_allow([^HAVE_YCDATABASE$])
-m4trace:config.m4:14: -1- AH_OUTPUT([HAVE_YCDATABASE], [/* Whether you have Ycdatabase */
+m4trace:config.m4:15: -1- AC_DEFINE_TRACE_LITERAL([HAVE_YCDATABASE])
+m4trace:config.m4:15: -1- m4_pattern_allow([^HAVE_YCDATABASE$])
+m4trace:config.m4:15: -1- AH_OUTPUT([HAVE_YCDATABASE], [/* Whether you have Ycdatabase */
 #undef HAVE_YCDATABASE])
-m4trace:config.m4:15: -1- AC_DEFINE_TRACE_LITERAL([COMPILE_DL_YCDATABASE])
-m4trace:config.m4:15: -1- m4_pattern_allow([^COMPILE_DL_YCDATABASE$])
-m4trace:config.m4:15: -1- AH_OUTPUT([COMPILE_DL_YCDATABASE], [/* Whether to build ycdatabase as dynamic module */
+m4trace:config.m4:16: -1- AC_DEFINE_TRACE_LITERAL([COMPILE_DL_YCDATABASE])
+m4trace:config.m4:16: -1- m4_pattern_allow([^COMPILE_DL_YCDATABASE$])
+m4trace:config.m4:16: -1- AH_OUTPUT([COMPILE_DL_YCDATABASE], [/* Whether to build ycdatabase as dynamic module */
 #undef COMPILE_DL_YCDATABASE])
 m4trace:configure.ac:149: -1- AC_PROG_LIBTOOL
 m4trace:configure.ac:149: -1- AC_SUBST([LN_S], [$as_ln_s])

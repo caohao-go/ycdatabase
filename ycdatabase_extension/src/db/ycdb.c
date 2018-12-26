@@ -90,6 +90,7 @@ void ycdb_init() {
     zend_declare_property_null(ycdb_ce_ptr, ZEND_STRL("errinfo"), ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(ycdb_ce_ptr, ZEND_STRL("_pdo"), ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(ycdb_ce_ptr, ZEND_STRL("cache"), ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_long(ycdb_ce_ptr, ZEND_STRL("insert_id"), 0, ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(ycdb_ce_ptr, ZEND_STRL("unix_socket"), ZEND_ACC_PUBLIC TSRMLS_CC);
 }
 
@@ -170,6 +171,12 @@ PHP_METHOD(ycdb, errorInfo) {
 
 PHP_METHOD(ycdb, initialize) {
     zval* thisObject = getThis();
+    
+    zval* unix_socket = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("unix_socket") TSRMLS_CC);
+	if(YC_IS_NOT_NULL(unix_socket)) { ///// unix domain sockcet ////
+		RETURN_TRUE;
+	}
+	
     zval* pdo = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo") TSRMLS_CC);
 
     if (YC_IS_NULL(pdo)) {
@@ -239,7 +246,12 @@ PHP_METHOD(ycdb, initialize) {
 //事务开始
 PHP_METHOD(ycdb, begin) {
     zval* thisObject = getThis();
-
+	
+	zval* unix_socket = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("unix_socket") TSRMLS_CC);
+	if(YC_IS_NOT_NULL(unix_socket)) { ///// unix domain sockcet ////
+		RETURN_MY_ERROR("unix domain socket not support transaction");
+	}
+		
     zval* pdo = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo") TSRMLS_CC);
     if (YC_IS_NULL(pdo)) {
         RETURN_MY_ERROR("pdo is empty");
@@ -255,7 +267,12 @@ PHP_METHOD(ycdb, begin) {
 //事务提交
 PHP_METHOD(ycdb, commit) {
     zval* thisObject = getThis();
-
+	
+	zval* unix_socket = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("unix_socket") TSRMLS_CC);
+	if(YC_IS_NOT_NULL(unix_socket)) { ///// unix domain sockcet ////
+		RETURN_MY_ERROR("unix domain socket not support transaction");
+	}
+	
     zval* pdo = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo") TSRMLS_CC);
     if (YC_IS_NULL(pdo)) {
         RETURN_MY_ERROR("pdo is empty");
@@ -272,12 +289,17 @@ PHP_METHOD(ycdb, commit) {
 //事务回滚
 PHP_METHOD(ycdb, rollback) {
     zval* thisObject = getThis();
-
+	
+	zval* unix_socket = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("unix_socket") TSRMLS_CC);
+	if(YC_IS_NOT_NULL(unix_socket)) { ///// unix domain sockcet ////
+		RETURN_MY_ERROR("unix domain socket not support transaction");
+	}
+	
     zval* pdo = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo") TSRMLS_CC);
     if (YC_IS_NULL(pdo)) {
         RETURN_MY_ERROR("pdo is empty");
     }
-
+	
     if (yc_call_user_function_return_bool_or_unsigned(&pdo, "rollBack", 0, NULL) == 1) {
         RETURN_TRUE;
     }
@@ -341,6 +363,7 @@ PHP_METHOD(ycdb, exec) {
 	        	memset(map_buf, 0, map_buf_size);
 	        	
       			sprintf(map_buf, "%d\n%s", ZSTR_LEN(smart_map_buf.s), ZSTR_VAL(smart_map_buf.s));
+      			
       			php_stream_write(stream, map_buf, strlen(map_buf));
         		free(map_buf);
         	} else {
@@ -408,16 +431,18 @@ PHP_METHOD(ycdb, exec) {
 			RETURN_LONG(-1);
         }
         
+		zval* data = php_yc_array_get_value(Z_ARRVAL_P(recv_array), "data");
+        	
         if(is_write) {
-        	zval* data = php_yc_array_get_value(Z_ARRVAL_P(recv_array), "data");
         	zval* affect_rows = php_yc_array_get_value(Z_ARRVAL_P(data), "affected_rows");
         	int row_count = Z_LVAL_P(affect_rows);
+        	
+        	zval* insert_id = php_yc_array_get_value(Z_ARRVAL_P(data), "insert_id");
+        	zend_update_property_long(ycdb_ce_ptr, thisObject, ZEND_STRL("insert_id"), Z_LVAL_P(insert_id) TSRMLS_DC);
+        	
 			yc_zval_ptr_dtor(&recv_array);
-			
             RETURN_LONG(row_count);
         } else {
-        	zval* data = php_yc_array_get_value(Z_ARRVAL_P(recv_array), "data");
-        	
         	//是否单列
 		    int ret_count = zend_hash_num_elements(Z_ARRVAL_P(data));
 		    
@@ -641,27 +666,33 @@ PHP_METHOD(ycdb, insert_id) {
 
     //初始化错误
     update_error_info(thisObject, "00000", "");
-
-    zval* pdo = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo") TSRMLS_CC);
-    if (YC_IS_NULL(pdo)) {
-        RETURN_MY_ERROR("pdo is empty");
-    }
-
-    //exec
-    zval* insertid = NULL;
-    if (yc_call_user_function_ex_fast(&pdo, "lastInsertId", &insertid, 0, NULL) == FAILURE) {
-        yc_zval_free(insertid);
-        yc_php_fatal_error(E_ERROR, "failed to get lastInsertId");
-        RETURN_LONG(-1);
-    }
-
-    if (EG(exception) || YC_IS_NULL(insertid)) {
-        yc_zval_free(insertid);
-        RETURN_MY_ERROR("failed to get lastInsertId, pdo is not initialized");
-    }
-
-    RETVAL_ZVAL(insertid, 1, 1);
-    efree(insertid);
+	
+	zval* unix_socket = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("unix_socket") TSRMLS_CC);
+	if(YC_IS_NOT_NULL(unix_socket)) { ///// unix domain sockcet ////
+		zval* insert_id = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("insert_id") TSRMLS_CC);
+		RETVAL_ZVAL(insert_id, 1, 0);
+	} else {
+	    zval* pdo = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo") TSRMLS_CC);
+	    if (YC_IS_NULL(pdo)) {
+	        RETURN_MY_ERROR("pdo is empty");
+	    }
+	
+	    //exec
+	    zval* insertid = NULL;
+	    if (yc_call_user_function_ex_fast(&pdo, "lastInsertId", &insertid, 0, NULL) == FAILURE) {
+	        yc_zval_free(insertid);
+	        yc_php_fatal_error(E_ERROR, "failed to get lastInsertId");
+	        RETURN_LONG(-1);
+	    }
+	
+	    if (EG(exception) || YC_IS_NULL(insertid)) {
+	        yc_zval_free(insertid);
+	        RETURN_MY_ERROR("failed to get lastInsertId, pdo is not initialized");
+	    }
+	
+	    RETVAL_ZVAL(insertid, 1, 1);
+	    efree(insertid);
+	}
 }
 
 //insert 插入

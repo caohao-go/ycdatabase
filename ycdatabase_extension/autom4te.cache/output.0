@@ -4144,6 +4144,7 @@ ycdatabase_source_file="ycdatabase.c \
 					 src/string.c \
 					 src/array.c \
 					 src/object.c \
+					 src/net.c \
 					 src/db/ycdb.c"
 
 if test "$PHP_YCDATABASE" = "yes"; then
