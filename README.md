@@ -90,20 +90,20 @@ try{
 ## Native SQL query
 
 We can directly execute the sql statement through the exec() function,the return value is the number of rows affected by the execution, and execute select statement through the query() function, If $ret = -1 indicates that the sql execution error occurs, we can pass $ycdb->errorCode(), $ycdb- >errorInfo() returns the error code and error description respectively.<br><br>
-_我们可以通过exec函数直接执行sql语句，返回值为执行结果影响行数，以及query函数执行select语句，如果 $ret = -1 则说明 sql 执行出错，我们可以通过 $ycdb->errorCode,$ycdb->errorInfo() 分别返回错误代码、错误描述。_
+_我们可以通过exec函数直接执行sql语句，如果是insert操作，则返回insert_id，其他返回值为执行结果影响行数，以及query函数执行select语句，如果 $ret = -1 则说明 sql 执行出错，我们可以通过 $ycdb->errorCode,$ycdb->errorInfo() 分别返回错误代码、错误描述。_
 
 
 - insert data
 ```php
-$ret = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) 
+$insert_id = $ycdb->exec("insert into user_info_test(username, sexuality, age, height) 
                     values('smallhow', 'male', 29, 180)");
-if($ret == -1) {
+if($insert_id == -1) {
     $code = $ycdb->errorCode();
     $info = $ycdb->errorInfo();
     echo "code:" . $code . "\n";
     echo "info:" . $info[2] . "\n";
 } else {
-    echo $ret;
+    echo $insert_id;
 }
 ```
 
@@ -451,21 +451,21 @@ insert($table, $data, $cache_info)
 > cache info
 
 #### return [int]
->Fail if -1 is returned, otherwise the number of inserted records is returned<br>
->_如果返回 -1 则失败，否则返回插入记录数_
+>Fail if -1 is returned, otherwise insert_id is returned<br>
+>_如果返回 -1 则失败，否则返回insert_id_
  
 ```php
 $data = array('username' => 'smallhow','sexuality' => 'male','age' => 35, 'height' => '168');
-$ret = $ycdb->insert("user_info_test", $data);
-if($ret == -1) {
+$insert_id = $ycdb->insert("user_info_test", $data);
+if($insert_id == -1) {
   $code = $ycdb->errorCode();
   $info = $ycdb->errorInfo();
   echo "code:" . $code . "\n";
   echo "info:" . $info[2] . "\n";
+} else {
+  echo $insert_id;
 }
 
-//If you want to get the ID of the last inserted row, you need to call the insert_id() method separately.
-$uid = $ycdb->insert_id();
 ```
 
 ## Update statement
@@ -691,7 +691,7 @@ $insert_data['sexuality'] = 'male';
 $insert_data['age'] = 29;
 $insert_data['height'] = 176;
 
-$data = $ycdb->insert("user_info_test", $insert_data, ['key' => $cache_key]);
+$insert_id = $ycdb->insert("user_info_test", $insert_data, ['key' => $cache_key]);
 
 echo $redis->get($cache_key) . "\n";
 ```
