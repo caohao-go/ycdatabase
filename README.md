@@ -136,7 +136,7 @@ $info = $ycdb->errorInfo();
 ```
 
 ## Where statement
-- Basic usage _基本用法_
+- Basic usage
 ```php
 $ycdb->select("user_info_test", "*", ["sexuality" => "male"]);
 // WHERE sexuality = 'male'
@@ -166,7 +166,7 @@ $data = $ycdb->select("user_info_test", "*", [
 // WHERE uid != 10 AND username != "James" AND height NOT IN ( 165, 168, 172) AND bool_flag = 1 AND remark IS NOT NULL
 ```
 
-- Conditional Query _条件搜索_ 
+- Conditional Query
 
 You can use "AND" or "OR" to make up very complex SQL statements.
 ```php
@@ -191,7 +191,6 @@ $data = $ycdb->select("user_info_test", "*", [
 // WHERE (age = 29 OR sexuality='female') AND height = 177
 
 //Attention： Because ycdb uses array arguments, the first OR is overwritten, the following usage is wrong, 
-//注意： 第一个 OR 被覆盖了，所以这个写法是错误的
 $data = $ycdb->select("user_info_test", "*", [
   "AND" => [
     "OR" => [
@@ -207,7 +206,6 @@ $data = $ycdb->select("user_info_test", "*", [
 // [X] SELECT * FROM user_info_test WHERE (uid != 3 OR height >= 170)
 
 //We can use # and comments to distinguish between two diffrents OR
-//我们可以用 # + 注释 来区分两个不同的 OR
 $data = $ycdb->select("user_info_test", "*", [
   "AND" => [
     "OR #1" => [
@@ -222,7 +220,7 @@ $data = $ycdb->select("user_info_test", "*", [
 ]);
 // [√] SELECT * FROM user_info_test WHERE (age = 29 OR sexuality = 'female') AND (uid != 3 OR height >= 170)
 ```
-- Fuzzy Matching _模糊匹配 Like_
+- Fuzzy Matching _Like_
 
 LIKE USAGE [~].
 ```php
@@ -236,7 +234,7 @@ $data = $ycdb->select("user_info_test", "*", [ "username[!~]" => "%ide%" ]);
 // WHERE username NOT LIKE '%ide%'
 ```
 
-- Use of wildcards _通配符的使用_
+- Use of wildcards 
 ```php
 $ycdb->select("user_info_test", "*", [ "username[~]" => "Londo_" ]); // London, Londox, Londos...
 
@@ -245,7 +243,7 @@ $ycdb->select("user_info_test", "id", [ "username[~]" => "[BCR]at" ]); // Bat, C
 $ycdb->select("user_info_test", "id", [	"username[~]" => "[!BCR]at" ]); // Eat, Fat, Hat...
 ```
 
-- ORDER BY And LIMIT _排序和limit_
+- ORDER BY And LIMIT
 ```php
 $data = $ycdb->select("user_info_test", "*", [
   'sexuality' => 'male',
@@ -313,13 +311,11 @@ select($table, $join, $columns, $where)
 
 #### return: [array]
 >Fail if -1 is returned, otherwise result array is returned<br>
->_如果返回 -1 则失败，否则返回结果数据_
 <br>
 
 - example
 
 You can use * to match all fields, but if you specify columns you can improve performance.<br>
-_你可以使用*来匹配所有字段, 但如果你指名字段名可以很好的提高性能._
 ```php
 $datas = $ycdb->select("user_info_test", [
   "uid",
@@ -356,7 +352,6 @@ $datas = $ycdb->select("user_info_test", "username");
 - Table join
 
 Multi-table query SQL is more complicated, and it can be easily solved with ycdb.<br>
-_多表查询SQL较为复杂，使用ycdb可以轻松的解决它_
 
 ```php
 // [>] == RIGH JOIN
@@ -418,7 +413,6 @@ $ycdb->select("user_info_test",
 - alias
 
 You can use aliases to prevent field conflicts<br>
-_你可以使用别名，以防止字段冲突_
 
 ```php
 $data = $ycdb->select("user_info_test(uinfo)", [
@@ -449,7 +443,6 @@ insert($table, $data, $cache_info)
 
 #### return [int]
 >Fail if -1 is returned, otherwise insert_id is returned<br>
->_如果返回 -1 则失败，否则返回insert_id_
  
 ```php
 $data = array('username' => 'smallhow','sexuality' => 'male','age' => 35, 'height' => '168');
@@ -481,7 +474,6 @@ replace($table, $data, $cache_info)
 
 #### return [int]
 >Fail if -1 is returned, otherwise insert_id is returned<br>
->_如果返回 -1 则失败，否则返回insert_id_
  
 ```php
 $data = array('username' => 'smallhow','sexuality' => 'male','age' => 35, 'height' => '168');
@@ -513,7 +505,6 @@ update($table, $data, $where)
 
 #### return [int]
 >Fail if -1 is returned, otherwise the number of update records is returned<br>
->_如果返回 -1 则失败，否则返回更新记录数_
 
 ```php
 $data = array('height' => 182,'age' => 33);
@@ -534,7 +525,6 @@ delete($table, $where)
 
 #### return [int]
 >Fail if -1 is returned, otherwise the number of delete records is returned<br>
->_如果返回 -1 则失败，否则返回删除记录数_
 
 ```php
 $where = array('username' => 'smallhow');
