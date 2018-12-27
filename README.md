@@ -319,6 +319,8 @@ select($table, $join, $columns, $where)
 > The conditions of the query.
 
 #### return: [array]
+>Fail if -1 is returned, otherwise result array is returned<br>
+>_如果返回 -1 则失败，否则返回结果数据_
 <br>
 
 - example
@@ -549,37 +551,6 @@ $ret = $ycdb->delete("user_info_test", $where);
 ## Whole Example
 
 ```php
-/************** the complete example **********************
-SELECT  `name` AS `a`, `avatar` AS `b`, `age` 
-FROM `table_a` AS `a` 
-RIGHT JOIN `AAAA` AS `a1` USING (`id`)  
-LEFT JOIN `BBBB` USING (`E1`,`E2`,`E3`)  
-RIGHT JOIN `CCCC` AS `c1` ON `a`.`GG`=`c1`.`HH` AND `II`.`KK` =`c1`.`LL`  
-WHERE `user`.`email` NOT IN ('foo@bar.com', 'cat@dog.com', 'admin@ycdb.in') AND 
-`user`.`uid` < 11111 AND `uid` >= 222 AND 
-`uid` IS NOT NULL AND 
-`count` NOT IN (36, 57, 89) AND 
-`id` != 1 AND `int_num` != 3 AND `double_num` != 3.76 AND 
-`AA` LIKE '%saa%' AND `BB` NOT LIKE '%sbb' AND 
-(`CC` LIKE '11%' OR `CC` LIKE '22_' OR `CC` LIKE '33%') AND 
-(`DD` NOT LIKE '%44%' OR `DD` NOT LIKE '55%' OR `DD` NOT LIKE '66%') AND 
-(`EE` LIKE '%E11' AND `EE` LIKE 'E22') AND 
-(`FF` LIKE '%F33' OR `FF` LIKE 'F44') AND 
-(`GG` NOT LIKE '%G55' AND `GG` NOT LIKE 'G66') AND 
-(`HH` NOT LIKE 'H77' OR `HH` NOT LIKE 'H88') AND 
-(`II` BETWEEN 1 AND 12) AND NOT 
-(`LL` BETWEEN 1 AND 12)  AND (
-  (`user_name` IS NULL OR `email` = 'foo@bar.com') AND 
-  (`user_name` = 'bar' OR `email` = 'bar@foo.com')
-) AND (`user_name` != 'foo' OR `promoted` != 1) 
-GROUP BY type,age,gender 
-HAVING `uid`.`num` > 111 AND `type` > 'smart' AND 
-	`id` != 0 AND `god3` != 9.86 AND `uid` IS NOT NULL 
-	AND `AA` LIKE 'SSA%' AND (`CC` LIKE '11%' OR `CC` LIKE '22%' OR `CC` LIKE '33%')
-ORDER BY  `user`.`score` , `user`.`uid` ASC, `time` DESC 
-LIMIT 33
-*/
-
 $table = "table_a(a)";
 
 $join = [
@@ -778,19 +749,7 @@ stream {
   lua_code_cache on;
 
   lua_check_client_abort on;
-
-# server {
-# listen unix:/tmp/redis_pool.sock;
-
-# content_by_lua_block {
-#     local redis_pool = require "redis_pool"
-			
-#     pool = redis_pool:new({ip = "127.0.0.1", port = 6379})
-
-#     pool:run()
-#   }
-# }
-	
+  
   server {
     listen unix:/tmp/mysql_pool.sock;
 		
@@ -833,196 +792,4 @@ if($ret == -1) {
 } else {
   print_r($ret);
 }
-```
-
-### MySQL Connection Pool Lua Code
-
- ~/openresty-pool/mysql_pool.lua
- 
-```lua
-local mysql = require "resty.mysql"
-local cjson = require "cjson"
- 
-local assert = assert
-local setmetatable = setmetatable
-local tonumber = tonumber
- 
--- 解析请求
-local function parse_request(sock)
-    --获取 sql 语句
-    local sql_size, err = sock:receive()
-    
-    if not sql_size then
-    	if err == "timeout" then
-            sock:close()
-        end
-		return nil, err
-    end
-    
-    local size = tonumber(sql_size)
-    if size <= 0 then
-		return nil, "SQL size is zero"
-	end
-	
-    local sql_str, err = sock:receive(size)
-    if not sql_str then
-    	if err == "timeout" then
-            sock:close()
-        end
-		return nil, err
-	end
-	
-	--获取 map
-	local map_size, err = sock:receive()
-		
-    if not map_size then
-        if err == "timeout" then
-            sock:close()
-        end
-        return nil, err
-    end
-    
-    size = tonumber(map_size);
-    if size <= 0 then
-    	-- 没有 map
-		return sql_str
-	end
-	
-    local map_res, err = sock:receive(map_size)
-    if not map_res then
-    	if err == "timeout" then
-            sock:close()
-        end
-		return nil, err
-	end
-	
-	-- 解析 map ，创建 SQL 语句，防止SQL注入
-	local maps = cjson.decode(map_res)
-	
-	for k, v in pairs(maps) do
-		if v == true then
-			v = 1
-		elseif v == false then
-			v = 0
-		end
-		
-		sql_str = ngx.re.gsub(sql_str, k, ngx.quote_sql_str(v))
-	end
-	
-    return sql_str
-end
- 
--- 返回请求
-local function response_success(sock, result)
-	local ret = {
-		errno = 0,
-		data = result
-	}
-	
-	local send_str = cjson.encode(ret)
-	
-	local ret, err = sock:send(string.len(send_str) ..  "\n" .. send_str)
-	
-	if not ret then
-		ngx.log(ngx.ERR, "response success failed : [", err, "], send_str=[", send_str, "]")
-		return nil, err
-	end
-end
- 
--- 返回请求
-local function response_error(sock, errno, errmsg, sqlstate)
-	local ret = {
-		errno = errno,
-		errorCode = sqlstate,
-		errorInfo = {sqlstate, errno, errmsg}
-	}
-	
-	local send_str = cjson.encode(ret)
-	local ret, err = sock:send(string.len(send_str) ..  "\n" .. send_str)
-	
-	if not ret then
-		ngx.log(ngx.ERR, "response error failed : [", err, "], send_str=[", send_str, "]")
-		return nil, err
-	end
-end
- 
--- 关闭数据库
-local function close_db(db)
-	if not db then
-		return
-	end
-	db:close()
-end
- 
--- 异常退出
-local function exit(err)
-    ngx.log(ngx.ERR, "ERROR EXIT: [", err, "]")
-    return ngx.exit(ngx.ERROR)
-end
- 
-----------------------------------------
-local _M = {}
-_M._VERSION = "1.0"
- 
-function _M.new(self, config)
-    local t = {
-        _host = config.host,
-        _port = config.port or 3306,
-        _user = config.user,
-        _password = config.password,
-        _database = config.database,
-        _timeout = config.timeout or 2000,  -- default 2 sec
-        _pool_size = config.pool_size or 100,
-        _max_idle_timeout = config.max_idle_timeout or 10000
-    }
-    
-    return setmetatable(t, { __index = _M })
-end
- 
-function _M.run(self)
-	local downstream_sock = assert(ngx.req.socket(true))
-	
-	local query_sql, err = parse_request(downstream_sock)
-	
-	if not query_sql then
-		return exit("parse_request failed : " .. err)
-	end
-        
-	--数据库连接
-	local db, err = mysql:new()
-	    
-	db:set_timeout(self._timeout)
-	
-	local ok, err, errno, sqlstate = db:connect{
-		host = self._host,
-		port = self._port,
-		database = self._database,
-		user = self._user,
-		password = self._password,
-		max_packet_size = 1024 * 1024}
-	
-	if not ok then
-		response_error(downstream_sock, -1, err, "E0001")
-		return exit("connect mysql error : " .. err)
-	end
-	
-	local result, err, errno, sqlstate = db:query(query_sql)
-	
-	-- 返回结果
-	if result then
-		response_success(downstream_sock, result)
-	else
-		ngx.log(ngx.ERR, "query failed: [", errno, "][", sqlstate, "][",err , "]")
-		response_error(downstream_sock, errno, err, sqlstate)
-	end
-	
-	-- 设置 mysql 连接池
-	local ok, err = db:set_keepalive(self._max_idle_timeout, self._pool_size)
-	if not ok then
-		ngx.log(ngx.ERR, "set_keepalive failed: [", err, "]")
-	end
-end
- 
-return _M
-
 ```
