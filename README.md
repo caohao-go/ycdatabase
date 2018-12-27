@@ -698,6 +698,7 @@ Let's focus on Nginx, its stream module implements load balancing of TCP/UDP ser
 
 ### OpenResty Install
 OpenResty Document: https://moonbingbing.gitbooks.io/openresty-best-practices/content/openresty/install_on_centos.html
+OpenResty Official Website : http://www.openresty.org/
 
 CentOS 6.8 Install :
 ```
