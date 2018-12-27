@@ -19,6 +19,7 @@
   - Database Transaction
   - Data Caching
   - MySQL Database Connection Pool
+  - Redis Connection Pool
   
 ## Instruction
   1、ycdb is an mysql database orm written in c, built in php extension, as we known, database ORM is a very time-consuming operation, especially for interpretive languages such as PHP, and for a project, the proportion of ORM is very high,so here I will implement the MySQL ORM operation in C language, and use the performance of C language to improve the performance of ORM.<br>
@@ -774,4 +775,69 @@ if($ret == -1) {
 } else {
   print_r($ret);
 }
+```
+
+## Redis Connection Pool
+Similarly, Redis can solve the connection pool problem in the same way.
+
+### Redis Connection Pool Config
+~/openresty-pool/conf/nginx.conf 
+```lua
+worker_processes  1;        #nginx worker 数量
+ 
+error_log logs/error.log;   #指定错误日志文件路径
+ 
+events {
+    worker_connections 1024;
+}
+ 
+stream {
+  lua_code_cache on;
+ 
+  lua_check_client_abort on;
+ 
+  server {
+    listen unix:/tmp/redis_pool.sock;
+ 
+    content_by_lua_block {
+      local redis_pool = require "redis_pool"
+			
+      pool = redis_pool:new({ip = "127.0.0.1", port = 6379, auth = "password"})
+ 
+      pool:run()
+    }
+  }
+	
+  server {
+ 
+    listen unix:/tmp/mysql_pool.sock;
+		
+    content_by_lua_block {
+      local mysql_pool = require "mysql_pool"
+			
+      local config = {host = "127.0.0.1", 
+                      user = "root", 
+                      password = "test", 
+                      database = "collect", 
+                      timeout = 2000, 
+                      max_idle_timeout = 10000, 
+                      pool_size = 200}
+						   
+      pool = mysql_pool:new(config)
+			
+      pool:run()
+    }
+  }
+}
+
+```
+
+### PHP Code
+```php
+$redis = new Redis();
+$redis->pconnect('/tmp/redis_pool.sock');
+var_dump($redis->hSet("foo1", "vvvvv42", 2));
+var_dump($redis->hSet("foo1", "vvvv", 33));
+var_dump($redis->expire("foo1", 111));
+var_dump($redis->hGetAll("foo1"));
 ```
