@@ -43,6 +43,7 @@ PHP_METHOD(ycdb, rollback);
 PHP_METHOD(ycdb, exec);
 PHP_METHOD(ycdb, query);
 PHP_METHOD(ycdb, insert);
+PHP_METHOD(ycdb, replace);
 PHP_METHOD(ycdb, insert_id);
 PHP_METHOD(ycdb, update);
 PHP_METHOD(ycdb, delete);

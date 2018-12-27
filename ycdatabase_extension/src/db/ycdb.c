@@ -40,6 +40,12 @@ ZEND_ARG_ARRAY_INFO(0, data, 0)
 ZEND_ARG_ARRAY_INFO(0, cache_info, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ycdb_replace_oo, 0, 0, 2)
+ZEND_ARG_INFO(0, table)
+ZEND_ARG_ARRAY_INFO(0, data, 0)
+ZEND_ARG_ARRAY_INFO(0, cache_info, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ycdb_update_oo, 0, 0, 2)
 ZEND_ARG_INFO(0, table)
 ZEND_ARG_ARRAY_INFO(0, data, 0)
@@ -61,6 +67,7 @@ static zend_function_entry ycdb_methods[] = {
     PHP_ME(ycdb, exec, arginfo_ycdb_exec_oo, ZEND_ACC_PUBLIC)
     PHP_ME(ycdb, query, arginfo_ycdb_query_oo, ZEND_ACC_PUBLIC)
     PHP_ME(ycdb, insert, arginfo_ycdb_insert_oo, ZEND_ACC_PUBLIC)
+    PHP_ME(ycdb, replace, arginfo_ycdb_replace_oo, ZEND_ACC_PUBLIC)
     PHP_ME(ycdb, insert_id, arginfo_ycdatabase_void, ZEND_ACC_PUBLIC)
     PHP_ME(ycdb, update, arginfo_ycdb_update_oo, ZEND_ACC_PUBLIC)
     PHP_ME(ycdb, delete, arginfo_ycdb_delete_oo, ZEND_ACC_PUBLIC)
@@ -433,7 +440,7 @@ PHP_METHOD(ycdb, exec) {
         }
         
 		zval* data = php_yc_array_get_value(Z_ARRVAL_P(recv_array), "data");
-        	
+        
         if(is_write) {
         	zval* return_info = NULL;
         	if(isinsert) {
@@ -799,6 +806,110 @@ PHP_METHOD(ycdb, insert) {
     rtrim_str(insert_keys, ",");
     rtrim_str(insert_value, ",");
     yc_multi_memcpy_auto_realloc(&insert_sql, 7, "INSERT INTO `", table, "` (", insert_keys ,") values (", insert_value, ")");
+    yc_string_efree_32(insert_keys);
+    yc_string_efree_32(insert_value);
+
+    //执行SQL
+    zval *result = NULL, *z_sql = NULL;
+    zval **exec_args[1];
+
+    YC_MAKE_STD_ZVAL(z_sql);
+    YC_ZVAL_STRING(z_sql, insert_sql, 1);
+    yc_string_efree_32(insert_sql);
+    exec_args[0] = &z_sql;
+
+    if (yc_call_user_function_ex_fast(&thisObject, "exec", &result, 1, exec_args) == FAILURE) {
+        yc_zval_ptr_dtor(&z_sql);
+        yc_zval_free(result);
+        RETURN_LONG(-1);
+    }
+
+    yc_zval_ptr_dtor(&z_sql);
+    RETVAL_ZVAL(result, 1, 1);
+    efree(result);
+}
+
+//replace 替换
+PHP_METHOD(ycdb, replace) {
+    char *table = NULL;
+    zval *thisObject = getThis();
+    zend_size_t table_len;
+    zval *data = NULL, *cache_info = NULL;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|z", &table, &table_len, &data, &cache_info) == FAILURE) {
+        RETURN_LONG(-1);
+    }
+	
+	//删除缓存
+    if(YC_IS_NOT_NULL(cache_info) && YC_IS_ARRAY(cache_info)) {
+        zval* cache_obj = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("cache") TSRMLS_CC);
+        del_cache(cache_obj, cache_info);
+    }
+    
+    //解析data数据
+    char *insert_sql, *insert_keys,*insert_value;
+    char *key;
+    zval *value;
+    uint32_t key_len;
+    int key_type;
+    char longval[MAP_ITOA_INT_SIZE], doubleval[32];
+
+    yc_string_emalloc_32(&insert_sql, 0);
+    yc_string_emalloc_32(&insert_keys, 0);
+    yc_string_emalloc_32(&insert_value, 0);
+
+    YC_HASHTABLE_FOREACH_START2(Z_ARRVAL_P(data), key, key_len, key_type, value)
+    if (HASH_KEY_IS_STRING != key_type) {
+        yc_string_efree_32(insert_keys);
+        yc_string_efree_32(insert_value);
+        yc_string_efree_32(insert_sql);
+        RETURN_MY_ERROR("input data must be key/value hash, not index array.");
+    } else {
+        yc_multi_memcpy_auto_realloc(&insert_keys, 3, "`", key, "`,");
+
+        switch (Z_TYPE_P(value)) {
+        case IS_NULL:
+            yc_multi_memcpy_auto_realloc(&insert_value, 1, "NULL,");
+            break;
+        case IS_ARRAY:
+            yc_multi_memcpy_auto_realloc(&insert_value, 1, "ARRAY,");
+            break;
+#if PHP_MAJOR_VERSION < 7 /* PHP Version 5 */
+        case IS_BOOL:
+            if (Z_BVAL_P(value)) {
+                yc_multi_memcpy_auto_realloc(&insert_value, 1, "1,");
+            } else {
+                yc_multi_memcpy_auto_realloc(&insert_value, 1, "0,");
+            }
+            break;
+#else /* PHP Version 7 */
+        case IS_TRUE:
+            yc_multi_memcpy_auto_realloc(&insert_value, 1, "1,");
+            break;
+        case IS_FALSE:
+            yc_multi_memcpy_auto_realloc(&insert_value, 1, "0,");
+            break;
+#endif
+        case IS_LONG:
+            yc_itoa(Z_LVAL_P(value), longval);
+            yc_multi_memcpy_auto_realloc(&insert_value, 2, longval, ",");
+            break;
+
+        case IS_DOUBLE:
+            sprintf(doubleval, "%g", Z_DVAL_P(value));
+            yc_multi_memcpy_auto_realloc(&insert_value, 2, doubleval, ",");
+            break;
+        case IS_STRING:
+            yc_multi_memcpy_auto_realloc(&insert_value, 3, "'", Z_STRVAL_P(value), "',");
+            break;
+        }
+
+    }
+    YC_HASHTABLE_FOREACH_END();
+
+    rtrim_str(insert_keys, ",");
+    rtrim_str(insert_value, ",");
+    yc_multi_memcpy_auto_realloc(&insert_sql, 7, "REPLACE INTO `", table, "` (", insert_keys ,") values (", insert_value, ")");
     yc_string_efree_32(insert_keys);
     yc_string_efree_32(insert_value);
 
@@ -2119,7 +2230,7 @@ int is_insert(char* sql) {
     rtrim(operator);
     php_strtoupper(operator, strlen(operator));
 
-    if (strcmp(operator, "INSERT") == 0) {
+    if (strcmp(operator, "INSERT") == 0 || strcmp(operator, "REPLACE") == 0) {
         return 1;
     }
 
