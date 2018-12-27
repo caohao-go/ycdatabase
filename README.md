@@ -25,10 +25,6 @@
   2、ycdb can solve SQL injection through parameter binding. <br>
   3、ycdb supports data caching. You can use redis as a medium to cache database data, but remember that when the update, insert, and delete operations involve caching data, you need to delete your cache to ensure data consistency.<br>
   4、ycdb uses a special way to establish a stable connection pool with MySQL. performance can be increased by at least 30%, According to PHP's operating mechanism, long connections can only reside on top of the worker process after establishment, that is, how many work processes are there. How many long connections, for example, we have 10 PHP servers, each launching 1000 PHP-FPM worker processes, they connect to the same MySQL instance, then there will be a maximum of 10,000 long connections on this MySQL instance, the number is completely Out of control! And PHP's connection pool heartbeat mechanism is not perfect<br><br>
-  1、ycdb是一个为PHP扩展写的纯C语言写的mysql数据库ORM扩展，众所周知，数据库ORM是一个非常耗时的操作，尤其对于解释性语言如PHP，而且对于一个项目来说，ORM大多数情况能占到项目很大的一个比例，所以这里我将MySQL的ORM操作用C语言实现，利用C语言的性能，提升ORM的性能。<br>
-  2、ycdb能通过参数绑定的方式解决SQL注入的问题。<br>
-  3、ycdb支持数据缓存，你可以采用redis作为介质来缓存数据库的数据，但是记得在update、insert、delete 操作涉及到与缓存数据相关的数据修改时，需要按key删除您的缓存，以保证数据一致性。<br>
-  4、ycdb通过一种特殊的方式来建立一个稳定的与MySQL之间的连接池，性能至少能提升30%，按照 PHP 的运行机制，长连接在建立之后只能寄居在工作进程之上，也就是说有多少个工作进程，就有多少个长连接，打个比方，我们有 10 台 PHP 服务器，每台启动 1000 个 PHP-FPM 工作进程，它们连接同一个 MySQL 实例，那么此 MySQL 实例上最多将存在 10000 个长连接，数量完全失控了！而且PHP的连接池心跳机制不完善。
   
 中文文档(Chinese document)： https://blog.csdn.net/caohao0591/article/details/84390713
   
@@ -75,7 +71,6 @@ $ycdb = new ycdb($db_conf);
 ```
 
   we can start by creating a ycdatabase object (ycdb) from the obove code, db_conf include host,username,password,dbname,port and option, option is a pdo attribution, you can get the detail from http://php.net/manual/en/pdo.setattribute.php, For example, PDO::ATTR_TIMEOUT in the above code is specifies the timeout duration in seconds, and PDO::ATTR_CASE is forcing column names to a specific case.<br><br>
-  _我们通过上面代码创建ycdatabase对象(ycdb)，db_conf是数据库配置，包含host,username,password,dbname,port等信息，还包含option参数，这个参数是pdo的设置参数，具体您可以参考网站 http://php.net/manual/zh/pdo.setattribute.php  , 例如上面代码中的PDO::ATTR_TIMEOUT是连接超时时间(秒)，PDO::ATTR_CASE是强制列名为指定的大小写。_
 
 ## Init ycdb connection
 - we need to init pdo connection before we use ycdatabase.
@@ -92,7 +87,6 @@ try{
 ## Native SQL query
 
 We can directly execute the sql statement through the exec() function,the return value is the number of rows affected by the execution, and execute select statement through the query() function, If $ret = -1 indicates that the sql execution error occurs, we can pass $ycdb->errorCode(), $ycdb- >errorInfo() returns the error code and error description respectively.<br><br>
-_我们可以通过exec函数直接执行sql语句，如果是insert操作，则返回insert_id，其他返回值为执行结果影响行数，以及query函数执行select语句，如果 $ret = -1 则说明 sql 执行出错，我们可以通过 $ycdb->errorCode,$ycdb->errorInfo() 分别返回错误代码、错误描述。_
 
 
 - insert data
@@ -135,7 +129,6 @@ echo json_encode($ret);
 ## Error Info
 
 Error codes and error messages can be obtained through the errorCode and errorInfo function<br>
-_可以通过 errorCode() 和errorInfo() 函数获取错误码和错误信息_
 
 ```php
 $code = $ycdb->errorCode();
@@ -635,7 +628,6 @@ if($ret1 == -1 || $ret2 == -1 ) {
 
 We can use redis, or any other cache system that supports set/get/del/expire function as the medium to store the data returned by the database. If you do not specify the expiration time, the default storage expiration time is 5 minutes. if The cache is specified. When we call data update function such as update/delete/insert, we should pass in the same cache key so that ycdb can clear the cache to ensure data consistency.<br><br>
 
-_我们可以以 redis,或者其他任何支持 set/get/del/expire 这4种方法的缓存系统作为介质，存储 database 返回的数据，如果不指定到期时间，默认存储到期时间为5分钟，当我们指定了缓存，如果对数据有update/delete/insert等更新操作，我们最好是传入相同的缓存key，以便ycdb能够清理缓存来保持数据的一致性_
 ```php
 //we want cache data by redis
 $redis = new Redis();
@@ -704,13 +696,10 @@ echo $redis->get($cache_key) . "\n";
 ## MySQL Database Connection Pool
 
 Short connection performance is generally not available. CPU resources are consumed by the system. Once the network is jittered, there will be a large number of TIME_WAIT generated. The service has to be restarted periodically or the machine is restarted periodically. The server is unstable, QPS is high and low, and the connection is stable and efficient. The pool can effectively solve the above problems, it is the basis of high concurrency. ycdb uses a special way to establish a stable connection pool with MySQL. performance can be increased by at least 30%, According to PHP's operating mechanism, long connections can only reside on top of the worker process after establishment, that is, how many work processes are there. How many long connections, for example, we have 10 PHP servers, each launching 1000 PHP-FPM worker processes, they connect to the same MySQL instance, then there will be a maximum of 10,000 long connections on this MySQL instance, the number is completely Out of control! And PHP's connection pool heartbeat mechanism is not perfect<br><br>
-_短连接性能普遍上不去，CPU 大量资源被系统消耗，网络一旦抖动，会有大量 TIME_WAIT 产生，不得不定期重启服务或定期重启机器，服务器工作不稳定，QPS 忽高忽低，稳定高效的连接池可以有效的解决上述问题，它是高并发的基础，ycdb通过一种特殊的方式来建立一个稳定的与MySQL之间的连接池，性能至少提升30%，按照 PHP 的运行机制，长连接在建立之后只能寄居在工作进程之上，也就是说有多少个工作进程，就有多少个长连接，打个比方，我们有 10 台 PHP 服务器，每台启动 1000 个 PHP-FPM 工作进程，它们连接同一个 MySQL 实例，那么此 MySQL 实例上最多将存在 10000 个长连接，数量完全失控了！而且PHP的连接池心跳机制不完善_
+
 
 ### How ?
 Let's focus on Nginx, its stream module implements load balancing of TCP/UDP services, and with the stream-lua module, we can implement programmable stream services, that is, custom TCP/N with Nginx. UDP service! Of course, you can write TCP/UDP services from scratch, but standing on Nginx's shoulder is a more time-saving and labor-saving choice. We can choose the OpenResty library to complete the MySQL connection pool function. OpenResty is a very powerful and well-functioning Nginx Lua framework. It encapsulates Socket, MySQL, Redis, Memcache, etc. But what is the relationship between Nginx and PHP connection pool? And listen to me slowly: Usually most PHP is used with Nginx, and PHP and Nginx are mostly on the same server. With this objective condition, we can use Nginx to implement a connection pool, connect to services such as MySQL on Nginx, and then connect to Nginx through a local Unix Domain Socket, thus avoiding all kinds of short links. Disadvantages, but also enjoy the benefits of the connection pool.
-
-_我们不妨绕着走。让我们把目光聚焦到 Nginx 的身上，其 stream 模块实现了 TCP/UDP 服务的负载均衡，同时借助 stream-lua 模块，我们就可以实现可编程的 stream 服务，也就是用 Nginx 实现自定义的 TCP/UDP 服务！当然你可以自己从头写 TCP/UDP 服务，不过站在 Nginx 肩膀上无疑是更省时省力的选择。我们可以选择 OpenResty 库来完成MySQL的连接池功能，OpenResty是一个非常强大，而且功能完善的Nginx Lua框架，他封装了Socket、MySQL, Redis, Memcache 等操作，可是 Nginx 和 PHP 连接池有什么关系？且听我慢慢道来：通常大部分 PHP 是搭配 Nginx 来使用的，而且 PHP 和 Nginx 多半是在同一台服务器上。有了这个客观条件，我们就可以利用 Nginx 来实现一个连接池，在 Nginx 上完成连接 MySQL 等服务的工作，然后 PHP 通过本地的 Unix Domain Socket 来连接 Nginx，如此一来既规避了短链接的种种弊端，也享受到了连接池带来的种种好处。_
-
 
 ### OpenResty Install
 OpenResty Document: https://moonbingbing.gitbooks.io/openresty-best-practices/content/openresty/install_on_centos.html
@@ -771,13 +760,12 @@ stream {
   }
 }
 ```
-
 If you have more than a MySQL Server, you can start another server and add a new listener to unix domain socket.<br>
-_你可以另起一个 server ， 并在listen unix 之后新增一个unix domain socket监听。_
+
 
 ### PHP Code
 Except the option is array("unix_socket" => "/tmp/mysql_pool.sock") , Php mysql connection pool usage is exactly the same as before,But, MySQL does not support transactions in unix domain socket mode.<br>
-_除了option 配置为 array("unix_socket" => "/tmp/mysql_pool.sock") 之外，php的mysql连接池使用方法和之前一模一样，另外， unix_socket 方式的 MySQL 不支持事务。_
+
 
 ```php
 $option = array("unix_socket" => "/tmp/mysql_pool.sock");
