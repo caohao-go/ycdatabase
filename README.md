@@ -12,6 +12,7 @@
   - Where statement
   - Select statement
   - Insert statement
+  - Replace statement
   - Update statement
   - Delete statement
   - Whole Example
@@ -458,6 +459,38 @@ insert($table, $data, $cache_info)
 ```php
 $data = array('username' => 'smallhow','sexuality' => 'male','age' => 35, 'height' => '168');
 $insert_id = $ycdb->insert("user_info_test", $data);
+if($insert_id == -1) {
+  $code = $ycdb->errorCode();
+  $info = $ycdb->errorInfo();
+  echo "code:" . $code . "\n";
+  echo "info:" . $info[2] . "\n";
+} else {
+  echo $insert_id;
+}
+
+```
+
+## Replace statement
+
+```php
+replace($table, $data, $cache_info)
+```
+#### table [string]
+> table name
+
+#### data [array]
+> replace data
+
+#### cache_info (optional) [array]
+> cache info
+
+#### return [int]
+>Fail if -1 is returned, otherwise insert_id is returned<br>
+>_如果返回 -1 则失败，否则返回insert_id_
+ 
+```php
+$data = array('username' => 'smallhow','sexuality' => 'male','age' => 35, 'height' => '168');
+$insert_id = $ycdb->replace("user_info_test", $data);
 if($insert_id == -1) {
   $code = $ycdb->errorCode();
   $info = $ycdb->errorInfo();
