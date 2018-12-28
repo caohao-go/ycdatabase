@@ -127,7 +127,6 @@ extern char* yc_multi_memcpy_auto_realloc(char** source, int n_str, ...); //è‡ªå
 #define yc_is_string_not_empty(p) (p != NULL && p[0] != '\0')
 #define yc_is_string_empty(p) !yc_is_string_not_empty(p)
 #define yc_init_stack_string(p, str)  YC_MAKE_STD_ZVAL(p); YC_ZVAL_STRING(p, str, 1);
-#define yc_sprint_stack_string_128(p, fmt_str, ...) do{ YC_MAKE_STD_ZVAL(p); char str[128] = {0}; sprintf(str, fmt_str, ##__VA_ARGS__); YC_ZVAL_STRING(p, str, 1);}while(0)
 
 #if defined(YC_USE_JEMALLOC) || defined(YC_USE_TCMALLOC)
 extern yc_inline char* yc_strdup(const char *s);
