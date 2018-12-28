@@ -199,10 +199,10 @@ PHP_METHOD(ycdb, initialize) {
         zval* charset = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("charset") TSRMLS_CC);
         zval* option = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("option") TSRMLS_CC);
         
-		YC_MAKE_STD_ZVAL(dsn);
-		char str[128] = {0}; 
-		sprintf(str, "mysql:host=%s;port=%d;dbname=%s", Z_STRVAL_P(host), Z_LVAL_P(port), Z_STRVAL_P(dbname)); 
-		YC_ZVAL_STRING(dsn, str, 1);
+        YC_MAKE_STD_ZVAL(dsn);
+        char str[128] = {0}; 
+        sprintf(str, "mysql:host=%s;port=%d;dbname=%s", Z_STRVAL_P(host), Z_LVAL_P(port), Z_STRVAL_P(dbname)); 
+        YC_ZVAL_STRING(dsn, str, 1);
 		
         args[0] = &dsn;
         args[1] = &username;
@@ -231,10 +231,10 @@ PHP_METHOD(ycdb, initialize) {
         zval *charset_sql;
         zval** exec_args[1];
 		
-		YC_MAKE_STD_ZVAL(charset_sql);
-		char str2[128] = {0}; 
-		sprintf(str2, "SET NAMES %s", Z_STRVAL_P(charset)); 
-		YC_ZVAL_STRING(charset_sql, str2, 1);
+        YC_MAKE_STD_ZVAL(charset_sql);
+        char str2[128] = {0}; 
+        sprintf(str2, "SET NAMES %s", Z_STRVAL_P(charset)); 
+        YC_ZVAL_STRING(charset_sql, str2, 1);
 		
         exec_args[0] = &charset_sql;
 
