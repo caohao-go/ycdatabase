@@ -94,7 +94,7 @@ try{
 
 ## Native SQL query
 
-We can directly execute the sql statement through the exec() function,the return value is the number of rows affected by the execution, and execute select statement through the query() function, If $ret = -1 indicates that the sql execution error occurs, we can pass $ycdb->errorCode(), $ycdb- >errorInfo() returns the error code and error description respectively.<br><br>
+We can directly execute the sql statement through the exec() function,the return value is the number of rows affected by the execution, or return insert_id if it is insert statement, when the table has not AUTO_INCREMENT field, insert statement will return zero, and execute select statement through the query() function, If $ret = -1 indicates that the sql execution error occurs, we can pass $ycdb->errorCode(), $ycdb- >errorInfo() returns the error code and error description respectively.<br><br>
 
 
 - insert data
@@ -450,7 +450,7 @@ insert($table, $data, $cache_info)
 > cache info
 
 #### return [int]
->Fail if -1 is returned, otherwise insert_id is returned<br>
+>Fail if -1 is returned, otherwise insert_id is returned, if the table has no AUTO_INCREMENT field, the insert_id is zero<br>
  
 ```php
 $data = array('username' => 'smallhow','sexuality' => 'male','age' => 35, 'height' => '168');
