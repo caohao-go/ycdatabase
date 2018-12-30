@@ -94,7 +94,7 @@ try{
 
 ## Native SQL query
 
-We can directly execute the sql statement through the exec() function,the return value is the number of rows affected by the execution, or return insert_id if it is insert statement, when the table has not AUTO_INCREMENT field, insert statement will return zero, and execute select statement through the query() function, If $ret = -1 indicates that the sql execution error occurs, we can pass $ycdb->errorCode(), $ycdb- >errorInfo() returns the error code and error description respectively.<br><br>
+We can directly execute the sql statement through the exec() function,the return value is the number of rows affected by the execution, or return insert_id if it is insert statement, when the table has not AUTO_INCREMENT field, the insert_id should be zero, and execute select statement through the query() function, If $ret = -1 indicates that the sql execution error occurs, we can pass $ycdb->errorCode(), $ycdb- >errorInfo() returns the error code and error description respectively.<br><br>
 
 
 - insert data
