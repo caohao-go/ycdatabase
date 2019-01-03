@@ -42,16 +42,9 @@ $db['default']['autoinit'] = TRUE;
 $db['default']['port'] = 3306;
 $db['default']['log_path'] = '/data/app/logs';
 
-$db['dabaojian']['host']     = '127.0.0.1';
-$db['dabaojian']['username'] = 'root';
-$db['dabaojian']['password'] = 'test';
-$db['dabaojian']['dbname']   = 'collect';
-$db['dabaojian']['pconnect'] = TRUE;
+$db['dabaojian']['unix_sock'] = '/tmp/mysql.sock';
 $db['dabaojian']['db_debug'] = TRUE;
-$db['dabaojian']['char_set'] = 'utf8';
-$db['dabaojian']['dbcollat'] = 'utf8_general_ci';
 $db['dabaojian']['autoinit'] = TRUE;
-$db['dabaojian']['port'] = 3306;
 $db['dabaojian']['log_path'] = '/data/app/logs';
 
 
