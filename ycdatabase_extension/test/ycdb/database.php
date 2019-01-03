@@ -42,7 +42,7 @@ $db['default']['autoinit'] = TRUE;
 $db['default']['port'] = 3306;
 $db['default']['log_path'] = '/data/app/logs';
 
-$db['dabaojian']['unix_sock'] = '/tmp/mysql.sock';
+$db['dabaojian']['unix_socket'] = '/tmp/mysql.sock';
 $db['dabaojian']['db_debug'] = TRUE;
 $db['dabaojian']['autoinit'] = TRUE;
 $db['dabaojian']['log_path'] = '/data/app/logs';
