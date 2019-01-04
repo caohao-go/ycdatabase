@@ -25,7 +25,7 @@
   1、Fast : ycdb is an mysql database ORM written in c, built in php extension, as we known, database ORM is a very time-consuming operation, especially for interpretive languages such as PHP, and for a project, the proportion of ORM is very high,so here I will implement the MySQL ORM operation in C language, and use the performance of C language to improve the performance of ORM.<br>
   2、Safe : ycdb can solve SQL injection through parameter binding. <br>
   3、Powerful : concise and powerful usage , support any operation in database.<br>
-  4、Easy : Extremely easy to learn and use, friendly construction
+  4、Easy : Extremely easy to learn and use, friendly construction.<br>
   5、Data-cache : ycdb supports data caching. You can use redis as a medium to cache database data, but remember that when the update, insert, and delete operations involve caching data, you need to delete your cache to ensure data consistency.<br>
   6、Connection-pool : ycdb uses a special way to establish a stable connection pool with MySQL. performance can be increased by at least 30%, According to PHP's operating mechanism, long connections can only reside on top of the worker process after establishment, that is, how many work processes are there. How many long connections, for example, we have 10 PHP servers, each launching 1000 PHP-FPM worker processes, they connect to the same MySQL instance, then there will be a maximum of 10,000 long connections on this MySQL instance, the number is completely Out of control! And PHP's connection pool heartbeat mechanism is not perfect<br><br>
   1、快速 - ycdb是一个为PHP扩展写的纯C语言写的mysql数据库ORM扩展，众所周知，数据库ORM是一个非常耗时的操作，尤其对于解释性语言如PHP，而且对于一个项目来说，ORM大多数情况能占到项目很大的一个比例，所以这里我将MySQL的ORM操作用C语言实现，利用C语言的性能，提升ORM的性能。<br>
