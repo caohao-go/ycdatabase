@@ -728,9 +728,9 @@ $/usr/local/openresty.1.13/nginx/sbin/nginx -p ~/openresty-pool
 ~/openresty-pool/conf/nginx.conf  :
 
 ```lua
-worker_processes  1;        #nginx worker 数量
+worker_processes  1;        #nginx worker process num
 
-error_log logs/error.log;   #指定错误日志文件路径
+error_log logs/error.log;   #nginx error log path
 
 events {
     worker_connections 1024;
@@ -790,9 +790,9 @@ Similarly, Redis can solve the connection pool problem in the same way.
 ### Redis Connection Pool Config
 ~/openresty-pool/conf/nginx.conf 
 ```lua
-worker_processes  1;        #nginx worker 数量
+worker_processes  1;        #nginx worker process num
  
-error_log logs/error.log;   #指定错误日志文件路径
+error_log logs/error.log;   #error log path
  
 events {
     worker_connections 1024;
