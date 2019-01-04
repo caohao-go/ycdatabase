@@ -721,6 +721,7 @@ $gmake install
 
 ###### open mysql pool ######
 $cp -rf ~/ycdatabase/openresty/openresty-pool ~/
+$mkdir ~/openresty-pool/logs
 $/usr/local/openresty.1.13/nginx/sbin/nginx -p ~/openresty-pool
 ```
 
