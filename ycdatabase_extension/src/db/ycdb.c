@@ -373,13 +373,20 @@ PHP_METHOD(ycdb, exec) {
         	smart_str_0(&smart_map_buf);
         	
         	if(smart_map_buf.s != NULL && ZSTR_VAL(smart_map_buf.s) != NULL && ZSTR_LEN(smart_map_buf.s) > 0) {
-        	    int smart_map_buf_len = strlen(ZSTR_VAL(smart_map_buf.s));
+        	    char* map_str = ZSTR_VAL(smart_map_buf.s);
+        	    int smart_map_buf_len = strlen(map_str);
         		size_t map_buf_size = 10 + smart_map_buf_len + 1;
 	        	char* map_buf = (char*)malloc(map_buf_size);
 	        	memset(map_buf, 0, map_buf_size);
 	        	
-      			sprintf(map_buf, "%d\n%s", smart_map_buf_len, ZSTR_VAL(smart_map_buf.s));
-      			
+	        	if(map_str[0] == '{' && map_str[smart_map_buf_len-1] != '}') {  //php_json_encode_ex bug end with not '}'
+	        	    sprintf(map_buf, "%d\n%s}", smart_map_buf_len+1, map_str);
+	        	} else if(map_str[0] == '[' && map_str[smart_map_buf_len-1] != ']') {  //php_json_encode_ex bug end with not ']'
+	        	    sprintf(map_buf, "%d\n%s]", smart_map_buf_len+1, map_str);
+	        	} else {
+      			    sprintf(map_buf, "%d\n%s", smart_map_buf_len, map_str);
+      			}
+
       			php_stream_write(stream, map_buf, strlen(map_buf));
         		free(map_buf);
         	} else {
