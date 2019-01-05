@@ -235,9 +235,9 @@ char *ltrim_str(char *str, char *remove){
 	return str;
 }
 
-char* yc_itoa(int num, char* str) {
-		int radix = 10; //十进制
-		memset(str, 0, MAP_ITOA_INT_SIZE);
+char* yc_itoa(long num, char* str) {
+	int radix = 10; //十进制
+	memset(str, 0, MAP_ITOA_INT_SIZE);
     char index[]="0123456789ABCDEF";
     unsigned unum;
     int i=0,j,k;
