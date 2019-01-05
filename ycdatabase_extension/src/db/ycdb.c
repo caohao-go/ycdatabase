@@ -373,11 +373,12 @@ PHP_METHOD(ycdb, exec) {
         	smart_str_0(&smart_map_buf);
         	
         	if(smart_map_buf.s != NULL && ZSTR_VAL(smart_map_buf.s) != NULL && ZSTR_LEN(smart_map_buf.s) > 0) {
-        		size_t map_buf_size = 10 + ZSTR_LEN(smart_map_buf.s) + 1;
+        	    int smart_map_buf_len = strlen(ZSTR_VAL(smart_map_buf.s));
+        		size_t map_buf_size = 10 + smart_map_buf_len + 1;
 	        	char* map_buf = (char*)malloc(map_buf_size);
 	        	memset(map_buf, 0, map_buf_size);
 	        	
-      			sprintf(map_buf, "%d\n%s", ZSTR_LEN(smart_map_buf.s), ZSTR_VAL(smart_map_buf.s));
+      			sprintf(map_buf, "%d\n%s", smart_map_buf_len, ZSTR_VAL(smart_map_buf.s));
       			
       			php_stream_write(stream, map_buf, strlen(map_buf));
         		free(map_buf);
