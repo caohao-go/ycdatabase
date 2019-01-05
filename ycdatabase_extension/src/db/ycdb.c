@@ -426,7 +426,8 @@ PHP_METHOD(ycdb, exec) {
         //关闭 unix socket
         php_stream_close(stream);
         
-        if(recv_buf[0] == 0) {
+        //string_debug("recv_buf", recv_buf);
+        if(recv_buf[0] == 0) { 
         	free(recv_buf);
         	RETURN_MY_ERROR("[exception] receive buff failed");
         }
