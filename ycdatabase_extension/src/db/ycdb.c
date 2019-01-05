@@ -375,7 +375,7 @@ PHP_METHOD(ycdb, exec) {
         	if(smart_map_buf.s != NULL && ZSTR_VAL(smart_map_buf.s) != NULL && ZSTR_LEN(smart_map_buf.s) > 0) {
         	    char* map_str = ZSTR_VAL(smart_map_buf.s);
         	    int smart_map_buf_len = strlen(map_str);
-        		size_t map_buf_size = 10 + smart_map_buf_len + 1;
+        		size_t map_buf_size = 10 + smart_map_buf_len + 2;
 	        	char* map_buf = (char*)malloc(map_buf_size);
 	        	memset(map_buf, 0, map_buf_size);
 	        	
