@@ -239,14 +239,14 @@ char* yc_itoa(long num, char* str) {
 	int radix = 10; //十进制
 	memset(str, 0, MAP_ITOA_INT_SIZE);
     char index[]="0123456789ABCDEF";
-    unsigned unum;
+    unsigned long unum;
     int i=0,j,k;
     if (radix==10&&num<0) {
-        unum=(unsigned)-num;
+        unum=(unsigned long)-num;
         str[i++]='-';
-    } else unum=(unsigned)num;
+    } else unum=(unsigned long)num;
     do {
-        str[i++]=index[unum%(unsigned)radix];
+        str[i++]=index[unum%(unsigned long)radix];
         unum/=radix;
     } while (unum);
     str[i]='\0';
