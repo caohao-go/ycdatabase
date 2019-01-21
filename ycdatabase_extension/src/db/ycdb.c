@@ -662,12 +662,9 @@ PHP_METHOD(ycdb, query) {
     exec_args[0] = &z_sql;
 
     if (yc_call_user_function_ex_fast(&thisObject, "exec", &statement, 1, exec_args) == FAILURE) {
-        yc_zval_ptr_dtor(&z_sql);
         yc_zval_free(statement);
         RETURN_LONG(-1);
     }
-
-    yc_zval_ptr_dtor(&z_sql);
     
 	//unix socket
     zval* unix_socket = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("unix_socket") TSRMLS_CC);
