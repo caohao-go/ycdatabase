@@ -19,7 +19,7 @@ ycdatabase
   - Whole Example
   - Database Transaction
   - Data Caching
-  - MySQL Database Connection Pool
+  - PHP Database Connection Pool
   - Redis Connection Pool
   
 ## Instruction
@@ -695,7 +695,7 @@ $insert_id = $ycdb->insert("user_info_test", $insert_data, ['key' => $cache_key]
 echo $redis->get($cache_key) . "\n";
 ```
 
-## MySQL Database Connection Pool
+## PHP Database Connection Pool
 
 Short connection performance is generally not available. CPU resources are consumed by the system. Once the network is jittered, there will be a large number of TIME_WAIT generated. The service has to be restarted periodically or the machine is restarted periodically. The server is unstable, QPS is high and low, and the connection is stable and efficient. The pool can effectively solve the above problems, it is the basis of high concurrency. ycdb uses a special way to establish a stable connection pool with MySQL. performance can be increased by at least 30%, According to PHP's operating mechanism, long connections can only reside on top of the worker process after establishment, that is, how many work processes are there. How many long connections, for example, we have 10 PHP servers, each launching 1000 PHP-FPM worker processes, they connect to the same MySQL instance, then there will be a maximum of 10,000 long connections on this MySQL instance, the number is completely Out of control! And PHP's connection pool heartbeat mechanism is not perfect<br><br>
 
