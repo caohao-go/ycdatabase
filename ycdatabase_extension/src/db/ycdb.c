@@ -436,15 +436,22 @@ PHP_METHOD(ycdb, exec) {
         zval* recv_array = NULL;
         YC_MAKE_STD_ZVAL(recv_array);
         
-        php_json_decode_ex(recv_array, recv_buf, strlen(recv_buf), 1);
-       	free(recv_buf);
+        //string_debug("recv_buf",  recv_buf);
+        zend_long options = 0;
+        options |=  (1<<0);
+        php_json_decode_ex(recv_array, recv_buf, strlen(recv_buf), options, 512 /* PHP_JSON_PARSER_DEFAULT_DEPTH default depth */ TSRMLS_CC);
        	
        	if(YC_IS_NULL(recv_array) || YC_IS_NOT_ARRAY(recv_array)) {
+       		char error_tmp[2048] = {0};
+       		sprintf(error_tmp, "convert recvbuff from json to array error , recv_len=[%d], recv_buf=[%s]", recv_len, recv_buf);
+       		free(recv_buf);
        		yc_zval_ptr_dtor(&recv_array);
-       		update_error_info(thisObject, "E0001", "convert recvbuff from json to array erro");
-       		RETURN_MY_ERROR("[exception] convert recvbuff from json to array erro");
+       		update_error_info(thisObject, "E0001", error_tmp);
+       		RETURN_MY_ERROR(error_tmp);
        	}
         
+       	free(recv_buf);
+       	
         //查询返回错误码
         zval* error_no = php_yc_array_get_value(Z_ARRVAL_P(recv_array), "errno");
         if(YC_IS_NULL(error_no) || Z_TYPE_P(error_no) != IS_LONG || Z_LVAL_P(error_no) != 0) { //返回错误信息
