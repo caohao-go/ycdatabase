@@ -295,6 +295,7 @@ $ycdb->select("user_info_test", "sexuality,age,height", [
 
 ```php
 select($table, $columns, $where)
+select_sql($table, $columns, $where)  //just get select sql and data map from ORM, not implement query
 ```
 
 #### table [string]
@@ -308,6 +309,7 @@ select($table, $columns, $where)
 
 ```php
 select($table, $join, $columns, $where)
+select_sql($table, $join, $columns, $where) //just get select sql and data map from ORM, not implement query
 ```
 #### table [string]
 > table name
@@ -443,6 +445,7 @@ $data = $ycdb->select("user_info_test(uinfo)", [
 
 ```php
 insert($table, $data, $cache_info)
+insert_sql($table, $data)  //just get insert sql from ORM, not implement query
 ```
 #### table [string]
 > table name
@@ -474,6 +477,7 @@ if($insert_id == -1) {
 
 ```php
 replace($table, $data, $cache_info)
+replace_sql($table, $data)  //just get replace sql from ORM, not implement query
 ```
 #### table [string]
 > table name
@@ -505,6 +509,7 @@ if($insert_id == -1) {
 
 ```php
 update($table, $data, $where)
+update_sql($table, $data, $where)  //just get update sql data and map from ORM, not implement query
 ```
 #### table [string]
 > table name
@@ -528,6 +533,7 @@ $ret = $ycdb->update("user_info_test", $data, $where);
 
 ```php
 delete($table, $where)
+delete_sql($table, $where)  //just get delete sql and data map from ORM, not implement query
 ```
 #### table [string]
 > table name
