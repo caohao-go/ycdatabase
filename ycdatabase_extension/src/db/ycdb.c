@@ -2349,7 +2349,7 @@ int preg_join_match(char* key, char* join, char* table, char* alias) {
 
     if (table_start != -1 && table_end != -1 && table_end > table_start) {
         if (table_end - table_start >= MAX_TABLE_SIZE) {
-            yc_php_fatal_error(E_ERROR, "join table size is too long, [%s]", key);
+            yc_php_fatal_error(E_ERROR, "join table name length is too long, max is %d, [%s]", MAX_TABLE_SIZE, key);
         }
 
         memset(table, 0, MAX_TABLE_SIZE);
@@ -2422,7 +2422,7 @@ int preg_table_match(char* key, char* table, char* alias) {
 
     if (table_start != -1 && table_end != -1 && table_end > table_start) {
         if (table_end - table_start >= MAX_TABLE_SIZE) {
-            yc_php_fatal_error(E_ERROR, "table size is too long, [%s]", key);
+            yc_php_fatal_error(E_ERROR, "table name length is too long, max is %d [%s]", MAX_TABLE_SIZE, key);
         }
 
         memset(table, 0, MAX_TABLE_SIZE);

@@ -25,7 +25,7 @@
 #define PDO_FETCH_COLUMN 7 
 
 #define MAP_KEY_SIZE 16
-#define MAX_TABLE_SIZE 48
+#define MAX_TABLE_SIZE 80
 #define MAX_OPERATOR_SIZE 4
 
 zend_class_entry ycdb_ce;
