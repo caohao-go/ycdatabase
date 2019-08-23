@@ -826,17 +826,13 @@ PHP_METHOD(ycdb, insert) {
                 dotnum = dot_num(Z_STRVAL_P(value), len) * 2;
                 char c, strTmp[len + dotnum + 8];
                 memset(strTmp, 0x00, len + dotnum + 8);
-
                 for(i = 0; i < len; i++) {
                     c = *(Z_STRVAL_P(value) + i);
-                    if (c == '\'') {
+                    if (c == '\'' || c == '\\' || c == '"') {
                         strTmp[j++] = '\\';
-                        strTmp[j++] = '\'';
-                    } else {
-                        strTmp[j++] =c;
                     }
+                    strTmp[j++] = c;
                 }
-
                 yc_multi_memcpy_auto_realloc(&insert_value, 3, "'", strTmp, "',");
             }
             break;
@@ -947,15 +943,12 @@ PHP_METHOD(ycdb, replace) {
                 dotnum = dot_num(Z_STRVAL_P(value), len) * 2;
                 char c, strTmp[len + dotnum + 8];
                 memset(strTmp, 0x00, len + dotnum + 8);
-
                 for(i = 0; i < len; i++) {
                     c = *(Z_STRVAL_P(value) + i);
-                    if (c == '\'') {
+                    if (c == '\'' || c == '\\' || c == '"') {
                         strTmp[j++] = '\\';
-                        strTmp[j++] = '\'';
-                    } else {
-                        strTmp[j++] =c;
                     }
+                    strTmp[j++] = c;
                 }
                 yc_multi_memcpy_auto_realloc(&insert_value, 3, "'", strTmp, "',");
             }
@@ -1061,15 +1054,12 @@ PHP_METHOD(ycdb, update) {
                 dotnum = dot_num(Z_STRVAL_P(value), len) * 2;
                 char c, strTmp[len + dotnum + 8];
                 memset(strTmp, 0x00, len + dotnum + 8);
-
                 for(i = 0; i < len; i++) {
                     c = *(Z_STRVAL_P(value) + i);
-                    if (c == '\'') {
+                    if (c == '\'' || c == '\\' || c == '"') {
                         strTmp[j++] = '\\';
-                        strTmp[j++] = '\'';
-                    } else {
-                        strTmp[j++] =c;
                     }
+                    strTmp[j++] = c;
                 }
                 yc_multi_memcpy_auto_realloc(&update_datas, 3, "'", strTmp, "',");
             }

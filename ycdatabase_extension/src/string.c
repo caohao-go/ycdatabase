@@ -358,7 +358,7 @@ void yc_unserialize(zval *return_value, zval *var TSRMLS_DC) {
 int dot_num(char* str, int len) {
 	int num = 0, i;
 	for(i = 0; i < len; i++) {
-		if (*(str + i) == '\'') {
+		if (*(str + i) == '\'' || *(str + i) == '\\' || *(str + i) == '"') {
 			num++;
 		}
 	}
