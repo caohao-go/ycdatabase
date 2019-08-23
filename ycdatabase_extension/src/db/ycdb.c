@@ -787,7 +787,7 @@ PHP_METHOD(ycdb, insert) {
         RETURN_MY_ERROR("input data must be key/value hash, not index array.");
     } else {
         yc_multi_memcpy_auto_realloc(&insert_keys, 3, "`", key, "`,");
-
+        
         switch (Z_TYPE_P(value)) {
         case IS_NULL:
             yc_multi_memcpy_auto_realloc(&insert_value, 1, "NULL,");
@@ -821,7 +821,24 @@ PHP_METHOD(ycdb, insert) {
             yc_multi_memcpy_auto_realloc(&insert_value, 2, doubleval, ",");
             break;
         case IS_STRING:
-            yc_multi_memcpy_auto_realloc(&insert_value, 3, "'", Z_STRVAL_P(value), "',");
+            {
+                int i = 0, j = 0, dotnum = 0, len = Z_STRLEN_P(value);
+                dotnum = dot_num(Z_STRVAL_P(value), len) * 2;
+                char c, strTmp[len + dotnum + 8];
+                memset(strTmp, 0x00, len + dotnum + 8);
+
+                for(i = 0; i < len; i++) {
+                    c = *(Z_STRVAL_P(value) + i);
+                    if (c == '\'') {
+                        strTmp[j++] = '\\';
+                        strTmp[j++] = '\'';
+                    } else {
+                        strTmp[j++] =c;
+                    }
+                }
+
+                yc_multi_memcpy_auto_realloc(&insert_value, 3, "'", strTmp, "',");
+            }
             break;
         }
 
@@ -925,7 +942,23 @@ PHP_METHOD(ycdb, replace) {
             yc_multi_memcpy_auto_realloc(&insert_value, 2, doubleval, ",");
             break;
         case IS_STRING:
-            yc_multi_memcpy_auto_realloc(&insert_value, 3, "'", Z_STRVAL_P(value), "',");
+            {
+                int i = 0, j = 0, dotnum = 0, len = Z_STRLEN_P(value);
+                dotnum = dot_num(Z_STRVAL_P(value), len) * 2;
+                char c, strTmp[len + dotnum + 8];
+                memset(strTmp, 0x00, len + dotnum + 8);
+
+                for(i = 0; i < len; i++) {
+                    c = *(Z_STRVAL_P(value) + i);
+                    if (c == '\'') {
+                        strTmp[j++] = '\\';
+                        strTmp[j++] = '\'';
+                    } else {
+                        strTmp[j++] =c;
+                    }
+                }
+                yc_multi_memcpy_auto_realloc(&insert_value, 3, "'", strTmp, "',");
+            }
             break;
         }
 
@@ -1023,7 +1056,23 @@ PHP_METHOD(ycdb, update) {
             yc_multi_memcpy_auto_realloc(&update_datas, 2, doubleval, ",");
             break;
         case IS_STRING:
-            yc_multi_memcpy_auto_realloc(&update_datas, 3, "'", Z_STRVAL_P(value), "',");
+            {
+                int i = 0, j = 0, dotnum = 0, len = Z_STRLEN_P(value);
+                dotnum = dot_num(Z_STRVAL_P(value), len) * 2;
+                char c, strTmp[len + dotnum + 8];
+                memset(strTmp, 0x00, len + dotnum + 8);
+
+                for(i = 0; i < len; i++) {
+                    c = *(Z_STRVAL_P(value) + i);
+                    if (c == '\'') {
+                        strTmp[j++] = '\\';
+                        strTmp[j++] = '\'';
+                    } else {
+                        strTmp[j++] =c;
+                    }
+                }
+                yc_multi_memcpy_auto_realloc(&update_datas, 3, "'", strTmp, "',");
+            }
             break;
         }
 

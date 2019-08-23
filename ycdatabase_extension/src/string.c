@@ -354,3 +354,13 @@ void yc_unserialize(zval *return_value, zval *var TSRMLS_DC) {
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 }
+
+int dot_num(char* str, int len) {
+	int num = 0, i;
+	for(i = 0; i < len; i++) {
+		if (*(str + i) == '\'') {
+			num++;
+		}
+	}
+	return num;
+}

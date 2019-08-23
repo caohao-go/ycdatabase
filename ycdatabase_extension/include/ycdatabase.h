@@ -145,6 +145,7 @@ extern char* ltrim_str(char *str, char *remove);
 extern char* rtrim_str(char *str, char *remove);
 extern char* yc_itoa(long num,char* str);
 extern char* yc_escape(char* sql);
+extern int dot_num(char* str, int len);
 extern char* strreplace(char* original, char const * const pattern, char const * const replacement);
 extern void yc_serialize(zval *return_value, zval *var TSRMLS_DC);
 extern void yc_unserialize(zval *return_value, zval *var TSRMLS_DC);
