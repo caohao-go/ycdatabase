@@ -823,9 +823,9 @@ PHP_METHOD(ycdb, insert) {
         case IS_STRING:
             {
                 int i = 0, j = 0, dotnum = 0, len = Z_STRLEN_P(value);
-                dotnum = dot_num(Z_STRVAL_P(value), len) * 2;
-                char c, strTmp[len + dotnum + 8];
-                memset(strTmp, 0x00, len + dotnum + 8);
+                dotnum = dot_num(Z_STRVAL_P(value), len);
+                char c, strTmp[len + dotnum + 4];
+                memset(strTmp, 0x00, len + dotnum + 4);
                 for(i = 0; i < len; i++) {
                     c = *(Z_STRVAL_P(value) + i);
                     if (c == '\'' || c == '\\' || c == '"') {
@@ -940,9 +940,9 @@ PHP_METHOD(ycdb, replace) {
         case IS_STRING:
             {
                 int i = 0, j = 0, dotnum = 0, len = Z_STRLEN_P(value);
-                dotnum = dot_num(Z_STRVAL_P(value), len) * 2;
-                char c, strTmp[len + dotnum + 8];
-                memset(strTmp, 0x00, len + dotnum + 8);
+                dotnum = dot_num(Z_STRVAL_P(value), len);
+                char c, strTmp[len + dotnum + 4];
+                memset(strTmp, 0x00, len + dotnum + 4);
                 for(i = 0; i < len; i++) {
                     c = *(Z_STRVAL_P(value) + i);
                     if (c == '\'' || c == '\\' || c == '"') {
@@ -1051,9 +1051,9 @@ PHP_METHOD(ycdb, update) {
         case IS_STRING:
             {
                 int i = 0, j = 0, dotnum = 0, len = Z_STRLEN_P(value);
-                dotnum = dot_num(Z_STRVAL_P(value), len) * 2;
-                char c, strTmp[len + dotnum + 8];
-                memset(strTmp, 0x00, len + dotnum + 8);
+                dotnum = dot_num(Z_STRVAL_P(value), len);
+                char c, strTmp[len + dotnum + 4];
+                memset(strTmp, 0x00, len + dotnum + 4);
                 for(i = 0; i < len; i++) {
                     c = *(Z_STRVAL_P(value) + i);
                     if (c == '\'' || c == '\\' || c == '"') {
