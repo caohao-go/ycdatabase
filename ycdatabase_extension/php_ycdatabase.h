@@ -27,7 +27,7 @@
 #include "ycdatabase.h"
 BEGIN_EXTERN_C()
 
-#define PHP_YCDATABASE_VERSION  "1.0.0"
+#define PHP_YCDATABASE_VERSION  "1.7.0"
 
 #ifndef ZEND_MOD_END
 #define ZEND_MOD_END {NULL,NULL,NULL}
