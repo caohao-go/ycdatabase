@@ -1521,13 +1521,6 @@ PHP_METHOD(ycdb, select_sql) {
         RETURN_LONG(-1);
     }
 
-    //是否查询单个列，当 where 为空的时候， 判断 join 是不是 "*"，否则判断 columns 是不是 "*"
-    int is_single_column = 0;
-    if ((YC_IS_NULL(where) && Z_TYPE_P(join) == IS_STRING && strcmp(Z_STRVAL_P(join), "*") != 0 && yc_strpos(Z_STRVAL_P(join), ",") < 0)
-            ||(YC_IS_NOT_NULL(where) && Z_TYPE_P(columns) == IS_STRING && strcmp(Z_STRVAL_P(columns), "*") != 0) && yc_strpos(Z_STRVAL_P(join), ",") < 0) {
-        is_single_column = 1;
-    }
-
     //查询语句初始化
     char *sql;
     zval *map;
@@ -1580,13 +1573,6 @@ PHP_METHOD(ycdb, select) {
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|zz", &table, &table_len, &join, &columns, &where) == FAILURE) {
         RETURN_LONG(-1);
-    }
-
-    //是否查询单个列，当 where 为空的时候， 判断 join 是不是 "*"，否则判断 columns 是不是 "*"
-    int is_single_column = 0;
-    if ((YC_IS_NULL(where) && Z_TYPE_P(join) == IS_STRING && strcmp(Z_STRVAL_P(join), "*") != 0 && yc_strpos(Z_STRVAL_P(join), ",") < 0)
-            ||(YC_IS_NOT_NULL(where) && Z_TYPE_P(columns) == IS_STRING && strcmp(Z_STRVAL_P(columns), "*") != 0) && yc_strpos(Z_STRVAL_P(join), ",") < 0) {
-        is_single_column = 1;
     }
 
     //查询语句初始化
@@ -1656,11 +1642,7 @@ PHP_METHOD(ycdb, select) {
         zval *result = NULL, *fetch_type = NULL;
 
         YC_MAKE_STD_ZVAL(fetch_type);
-        if (is_single_column == 1) {
-            ZVAL_LONG(fetch_type, PDO_FETCH_COLUMN);
-        } else {
-            ZVAL_LONG(fetch_type, PDO_FETCH_ASSOC);
-        }
+        ZVAL_LONG(fetch_type, PDO_FETCH_ASSOC);
 
         fetch_args[0] = &fetch_type;
 
