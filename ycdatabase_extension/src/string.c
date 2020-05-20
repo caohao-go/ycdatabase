@@ -57,7 +57,11 @@ zval* yc_preg_match(const char* regex_str, char* subject_str)
 	ZVAL_NULL(matches);
 	
 	//执行正则
-	php_pcre_match_impl(pce, subject_str, strlen(subject_str), &retval, matches, 0, 0, Z_L(0), Z_L(0));
+#if PHP_VERSION_ID < 70400
+    php_pcre_match_impl(pce, subject_str, strlen(subject_str), &retval, matches, 0, 0, Z_L(0), Z_L(0));
+#else
+    php_pcre_match_impl(pce, subject_str, &retval, matches, 0, 0, Z_L(0), Z_L(0));
+#endif
 
 	if(Z_TYPE(retval) == IS_FALSE) {
 		return NULL;
