@@ -205,8 +205,8 @@ PHP_METHOD(ycdb, initialize) {
         zval* option = yc_read_init_property(ycdb_ce_ptr, thisObject, ZEND_STRL("option") TSRMLS_CC);
         
         YC_MAKE_STD_ZVAL(dsn);
-        char str[128] = {0}; 
-        sprintf(str, "mysql:host=%s;port=%d;dbname=%s", Z_STRVAL_P(host), Z_LVAL_P(port), Z_STRVAL_P(dbname)); 
+        char str[256] = {0}; 
+        sprintf(str, "mysql:host=%s;port=%d;dbname=%s;charset=%s", Z_STRVAL_P(host), Z_LVAL_P(port), Z_STRVAL_P(dbname), Z_STRVAL_P(charset)); 
         YC_ZVAL_STRING(dsn, str, 1);
 		
         args[0] = &dsn;
@@ -231,32 +231,6 @@ PHP_METHOD(ycdb, initialize) {
         yc_zval_ptr_dtor(&dsn);
 
         zend_update_property(ycdb_ce_ptr, thisObject, ZEND_STRL("_pdo"), pdo TSRMLS_CC);
-
-        //设置字符集
-        zval *charset_sql;
-        zval** exec_args[1];
-		
-        YC_MAKE_STD_ZVAL(charset_sql);
-        char str2[128] = {0}; 
-        sprintf(str2, "SET NAMES %s", Z_STRVAL_P(charset)); 
-        YC_ZVAL_STRING(charset_sql, str2, 1);
-		
-        exec_args[0] = &charset_sql;
-
-        int setret = yc_call_user_function_return_bool_or_unsigned(&pdo, "exec", 1, exec_args);
-
-        if (setret == FAILURE) {
-            yc_zval_ptr_dtor(&charset_sql);
-            yc_php_fatal_error(E_WARNING, "failed to set database charset.");
-            RETURN_FALSE;
-        }
-
-        if (EG(exception)) {
-            yc_zval_ptr_dtor(&charset_sql);
-            RETURN_FALSE;
-        }
-
-        yc_zval_ptr_dtor(&charset_sql);
     }
 
     RETURN_TRUE;
